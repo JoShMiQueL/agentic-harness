@@ -30,13 +30,12 @@ devin-agentic/                       <- the repo
 ## Install
 
 Requires [Devin CLI](https://docs.devin.ai/cli) and **Python 3**
-(`python` on Windows, `python3` on Linux/macOS). Every entry point is a thin
-shim that downloads and runs `install.py` — one installer, all platforms.
+(`python` on Windows, `python3` on Linux/macOS). Every entry point is a thin shim that downloads and runs `install.py` — one installer, all platforms. PowerShell uses raw.githubusercontent.com (jsDelivr serves .ps1 as octet-stream which breaks `iex`); cmd/bash use jsDelivr.
 
 **Windows — PowerShell:**
 
 ```powershell
-irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex
+irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1 | iex
 ```
 
 **Windows — cmd.exe:**
@@ -75,7 +74,7 @@ repo, run a check:
 
 ```powershell
 .\install.ps1 -Check   # from a clone
-iex "& { $(irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1) } -Check"   # remote
+iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } -Check"   # remote
 ```
 
 Per-file statuses:
