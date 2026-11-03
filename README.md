@@ -168,7 +168,8 @@ way with `DEVIN_HOME=./sandbox/devin`.
 ## Notes
 
 - Works on Windows (pwsh). On Linux/macOS the same layout applies under
-  `~/.config/devin/` but the hook scripts would need porting from pwsh.
+  `~/.config/devin/` and `pwsh` is cross-platform, so the hook scripts and
+  installer run unchanged — only the home path differs.
 - NEVER commit `credentials.toml`, `.env*`, or your `org_id` — the
   `.gitignore` and `config.managed.json` (a fragment, not a full copy of
   your real config) exist precisely for that.
