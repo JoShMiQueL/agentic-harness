@@ -31,13 +31,14 @@
 param(
     [switch]$SetBypass,
     [switch]$Check,
-    [string]$Branch = 'main'
+    [string]$Branch = 'main',
+    [string]$DevinHome = (Join-Path $env:APPDATA 'devin'),  # sandbox: -DevinHome .\sandbox\devin
+    [switch]$WhatIf                                         # dry-run: prints plan, writes nothing
 )
 
 $ErrorActionPreference = 'Stop'
 $RepoSlug = 'JoShMiQueL/devin-agentic'
 $SrcHome  = 'devin-home'                                  # payload root, maps 1:1 to $DevinHome
-$DevinHome = Join-Path $env:APPDATA 'devin'
 $DevinExe = Join-Path $env:LOCALAPPDATA 'devin\cli\bin\devin.exe'
 $StampPath = Join-Path $DevinHome 'agentic.json'
 $GhHeaders = @{ 'User-Agent' = 'devin-agentic' }
@@ -132,6 +133,25 @@ Step 'Checking Devin CLI'
 if (-not (Test-Path $DevinExe)) {
     Write-Warning "Devin CLI not found at $DevinExe — install it first. Continuing anyway."
 }
+
+if ($WhatIf) {
+    Step 'DRY RUN - plan'
+    Write-Host "  target   : $DevinHome"
+    Write-Host "  version  : $RepoVersion"
+    foreach ($f in $Manifest.Keys) {
+        $dst = Join-Path $DevinHome $Manifest[$f]
+        $action = if (Test-Path $dst) { 'overwrite' } else { 'create' }
+        "{0,-42} {1}" -f $Manifest[$f], $action | Write-Host
+    }
+    foreach ($d in $stampFiles.Keys) {
+        if (-not $manifestDest.ContainsKey($d)) { "{0,-42} {1}" -f $d, 'delete (orphan)' | Write-Host }
+    }
+    Write-Host '  config.json: merge permissions + hooks (backup first)'
+    Write-Host '  stamp      : rewrite agentic.json'
+    Write-Host "`nDry run - no changes made." -ForegroundColor Yellow
+    return
+}
+
 New-Item -ItemType Directory -Force $DevinHome | Out-Null
 
 # --- Short-circuit: already in sync -------------------------------------------

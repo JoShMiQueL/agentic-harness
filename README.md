@@ -147,6 +147,24 @@ Per-session override: `devin --permission-mode auto`.
 | New lifecycle hook | Write `devin-home/hooks/<name>.ps1`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
 | Debug hooks | `/hooks` inside a session lists loaded hooks. `devin doctor` validates agent profiles. |
 
+## Developing / testing without touching your real env
+
+```powershell
+.\install.ps1 -WhatIf                                  # dry-run: prints plan only
+.\install.ps1 -DevinHome .\sandbox\devin               # full install into a sandbox
+$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin doctor # real validation vs sandbox
+$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin -p "use the scout subagent ..."
+```
+
+`DEVIN_DATA_DIR` redirects Devin CLI's whole data dir — skills, agents, hooks,
+sessions — so everything works for real against the sandbox while your real
+`%APPDATA%\devin` stays untouched. `-Check` and the stamp honor `-DevinHome`
+too (`.\install.ps1 -DevinHome .\sandbox\devin -Check`).
+
+On Linux/macOS the layout is `~/.config/devin/`; `pwsh` is cross-platform so
+the same installer and hook scripts work — test bash/WSL variants the same
+way with `DEVIN_HOME=./sandbox/devin`.
+
 ## Notes
 
 - Works on Windows (pwsh). On Linux/macOS the same layout applies under

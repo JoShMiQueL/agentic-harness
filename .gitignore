@@ -3,10 +3,11 @@ Thumbs.db
 .DS_Store
 desktop.ini
 
-# Installer backups (never in repo anyway, but just in case)
+# Installer backups and dev sandbox
 *.bak-*
+sandbox/
 
-# Devin secrets — NEVER commit
+# Devin secrets - NEVER commit
 credentials.toml
 .env
 .env.*

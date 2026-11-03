@@ -26,7 +26,9 @@ VERSION                # bumped on every shipped change
 - Hook scripts and installer must stay PowerShell 5.1 compatible — no PS7
   syntax (`??`, `?.`, `&&`/`||` operators, `ForEach-Object -Parallel`).
 - NEVER commit `credentials.toml`, `.env*`, or `org_id`.
-- After changing the payload, verify with `.\install.ps1` then
-  `.\install.ps1 -Check` and `devin doctor`.
+- After changing the payload, verify against a sandbox, never the real home:
+  `.\install.ps1 -DevinHome .\sandbox\devin` then
+  `$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin doctor`. `-WhatIf` prints
+  the plan without writing. `sandbox/` is gitignored.
 - The remote one-liner uses jsDelivr `@main`; raw.githubusercontent.com has
   sticky per-path caching — do not switch back.
