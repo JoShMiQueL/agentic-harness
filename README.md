@@ -10,18 +10,21 @@ to specialized subagents that run in their own context and report back a
 structured `REPORT` block, keeping the parent's context small.
 
 ```
-%APPDATA%\devin\                     <- everything installs here, globally
-├── AGENTS.md                        # global always-on rules (orchestration policy)
-├── config.json                      # permissions + hooks (merged by installer)
-├── agents\
-│   ├── scout.md                     # read-only research          (swe-2-medium)
-│   ├── tester.md                    # tests/lint/build reports    (swe-2-medium)
-│   ├── reviewer.md                  # diff reviews by severity    (swe-2-high)
-│   └── worker.md                    # scoped implementation       (swe-2-max)
-├── skills\orchestrate\SKILL.md      # /orchestrate — full delegation contract
-└── hooks\
-    ├── pre-tool-guard.ps1           # PreToolUse: blocks destructive cmds + secrets
-    └── session-start-memory.ps1     # SessionStart: injects .devin/memory/state.md
+devin-agentic/                       <- the repo
+├── AGENTS.md                        # PROJECT rules (for working on this repo)
+├── README.md  install.ps1  uninstall.ps1  VERSION
+└── devin-home/                      # payload — maps 1:1 onto %APPDATA%\devin\
+    ├── AGENTS.md                    # global always-on rules (orchestration policy)
+    ├── config.managed.json          # permissions + hooks merged into config.json
+    ├── agents\
+    │   ├── scout.md                 # read-only research          (swe-2-medium)
+    │   ├── tester.md                # tests/lint/build reports    (swe-2-medium)
+    │   ├── reviewer.md              # diff reviews by severity    (swe-2-high)
+    │   └── worker.md                # scoped implementation       (swe-2-max)
+    ├── skills\orchestrate\SKILL.md  # /orchestrate — full delegation contract
+    └── hooks\
+        ├── pre-tool-guard.ps1       # PreToolUse: destructive cmds + secrets
+        └── session-start-memory.ps1 # SessionStart: .devin/memory/state.md
 ```
 
 ## Install
@@ -138,10 +141,10 @@ Per-session override: `devin --permission-mode auto`.
 
 | Want | Where |
 |---|---|
-| New subagent profile | `agents/<name>.md` — YAML frontmatter (`name`, `description`, `model`, `allowed-tools`, `max-nesting`) + body = system prompt. End it with the REPORT block. |
+| New subagent profile | `devin-home/agents/<name>.md` — YAML frontmatter (`name`, `description`, `model`, `allowed-tools`, `max-nesting`) + body = system prompt. End it with the REPORT block. |
 | Change a model | `model:` in the profile. Check `devin models` for slugs. Note: `subagent_general` inherits the parent's model (expensive); custom profiles don't. |
-| Tune the guard | Edit the regexes in `hooks/pre-tool-guard.ps1` — no config change needed. |
-| New lifecycle hook | Write `hooks/<name>.ps1`, add an entry under `"hooks"` in `config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
+| Tune the guard | Edit the regexes in `devin-home/hooks/pre-tool-guard.ps1` — no config change needed. |
+| New lifecycle hook | Write `devin-home/hooks/<name>.ps1`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
 | Debug hooks | `/hooks` inside a session lists loaded hooks. `devin doctor` validates agent profiles. |
 
 ## Notes

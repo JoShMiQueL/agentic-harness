@@ -4,10 +4,15 @@
     Installs / syncs / checks the devin-agentic orchestration system.
 
 .DESCRIPTION
-    Idempotent installer with a dynamic manifest — every file under
-    agents/, skills/ and hooks/ (plus AGENTS.md) is discovered automatically
-    (local clone: filesystem scan; remote: GitHub tree API). Adding,
-    renaming or deleting files in the repo just works:
+    Idempotent installer with a dynamic manifest. Everything under
+    devin-home/ in the repo maps 1:1 onto %APPDATA%\devin\:
+
+      devin-home/agents/scout.md  ->  %APPDATA%\devin\agents\scout.md
+      devin-home/AGENTS.md        ->  %APPDATA%\devin\AGENTS.md
+
+    Local mode scans devin-home/ on disk; remote mode lists it via the
+    GitHub tree API and downloads commit-pinned files. Adding, renaming or
+    deleting files under devin-home/ just works:
 
       - added    -> installed and tracked by the stamp
       - modified -> overwritten on install, flagged by -Check
@@ -31,38 +36,26 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $RepoSlug = 'JoShMiQueL/devin-agentic'
-$RepoUrl = "https://raw.githubusercontent.com/$RepoSlug/$Branch"
-# raw.githubusercontent.com caches per-path for minutes; pin downloads to the
-# actual commit SHA (immutable URL, always fresh) resolved via the API.
-$GhHeaders = @{ 'User-Agent' = 'devin-agentic' }
+$SrcHome  = 'devin-home'                                  # payload root, maps 1:1 to $DevinHome
 $DevinHome = Join-Path $env:APPDATA 'devin'
 $DevinExe = Join-Path $env:LOCALAPPDATA 'devin\cli\bin\devin.exe'
 $StampPath = Join-Path $DevinHome 'agentic.json'
-$SyncDirs = 'agents', 'skills', 'hooks'          # copied verbatim under $DevinHome
-$TopFiles = 'AGENTS.md'                          # repo-root files synced verbatim
-$MergedFiles = 'config.managed.json'             # merged, never copied verbatim
+$GhHeaders = @{ 'User-Agent' = 'devin-agentic' }
 
 function Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Sha256($p) { (Get-FileHash $p -Algorithm SHA256 -ErrorAction Stop).Hash.ToLower() }
+function DestKey($rel) { ($rel -replace '\\', '/') }      # stamp keys: dest path, '/'
 
-# --- Discover manifest: repo-relative -> $DevinHome-relative ------------------
-# NOTE: under `irm | iex` there is no script file, so $PSScriptRoot is empty.
+# --- Discover manifest: repo-relative (devin-home/x) -> dest-relative (x) -----
 $RepoRoot = if ($PSScriptRoot) { $PSScriptRoot } else { $env:TEMP }
-$localRepo = [bool]$PSScriptRoot -and (Test-Path (Join-Path $RepoRoot 'agents\scout.md'))
+$localRepo = [bool]$PSScriptRoot -and (Test-Path (Join-Path $RepoRoot "$SrcHome\agents"))
 $Manifest = [ordered]@{}
 
 if ($localRepo) {
-    foreach ($d in $SyncDirs) {
-        $root = Join-Path $RepoRoot $d
-        if (Test-Path $root) {
-            Get-ChildItem $root -Recurse -File | ForEach-Object {
-                $rel = $_.FullName.Substring($RepoRoot.Length + 1) -replace '\\', '/'
-                $Manifest[$rel] = ($rel -replace '/', '\')
-            }
-        }
-    }
-    foreach ($f in $TopFiles) {
-        if (Test-Path (Join-Path $RepoRoot $f)) { $Manifest[$f] = $f }
+    $srcRoot = Join-Path $RepoRoot $SrcHome
+    Get-ChildItem $srcRoot -Recurse -File | ForEach-Object {
+        $rel = $_.FullName.Substring($srcRoot.Length + 1) -replace '\\', '/'
+        if ($rel -ne 'config.managed.json') { $Manifest["$SrcHome/$rel"] = ($rel -replace '/', '\') }
     }
 }
 else {
@@ -70,15 +63,14 @@ else {
     $sha = (Invoke-RestMethod "https://api.github.com/repos/$RepoSlug/commits/$Branch" -Headers $GhHeaders).sha
     $RepoUrl = "https://raw.githubusercontent.com/$RepoSlug/$sha"
     $tree = (Invoke-RestMethod "https://api.github.com/repos/$RepoSlug/git/trees/$sha`?recursive=1" -Headers $GhHeaders).tree
-    $remote = $tree | Where-Object {
-        $_.type -eq 'blob' -and ($_.path -match '^(' + ($SyncDirs -join '|') + ')/' -or $TopFiles -contains $_.path -or $MergedFiles -contains $_.path)
-    } | ForEach-Object { $_.path }
+    $remote = $tree | Where-Object { $_.type -eq 'blob' -and ($_.path -like "$SrcHome/*" -or $_.path -eq 'VERSION') } | ForEach-Object { $_.path }
     $RepoRoot = Join-Path $env:TEMP 'devin-agentic-src'
-    foreach ($f in $remote + 'VERSION') {
+    foreach ($f in $remote) {
         $dst = Join-Path $RepoRoot ($f -replace '/', '\')
         New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
         Invoke-WebRequest "$RepoUrl/$f" -OutFile $dst -UseBasicParsing
-        if ($f -ne 'VERSION' -and $f -ne $MergedFiles) { $Manifest[$f] = ($f -replace '/', '\') }
+        $rel = $f.Substring($SrcHome.Length + 1)
+        if ($rel -ne 'config.managed.json' -and $f -ne 'VERSION') { $Manifest[$f] = ($rel -replace '/', '\') }
         if (-not $Check) { Write-Host "  + $f" }
     }
 }
@@ -90,6 +82,9 @@ $stampFiles = @{}
 if ($stamp -and $stamp.files) {
     $stamp.files.PSObject.Properties | ForEach-Object { $stampFiles[$_.Name] = $_.Value }
 }
+# dest-rel paths currently in the manifest, as stamp keys
+$manifestDest = @{}
+foreach ($f in $Manifest.Keys) { $manifestDest[(DestKey $Manifest[$f])] = $true }
 
 # ============================ CHECK MODE ======================================
 if ($Check) {
@@ -100,11 +95,12 @@ if ($Check) {
 
     $dirty = $false
     foreach ($f in $Manifest.Keys) {
+        $rel = $Manifest[$f]
         $src = Join-Path $RepoRoot ($f -replace '/', '\')
-        $dst = Join-Path $DevinHome $Manifest[$f]
+        $dst = Join-Path $DevinHome $rel
         $srcHash = Sha256 $src
         $dstHash = if (Test-Path $dst) { Sha256 $dst } else { $null }
-        $stampHash = $stampFiles[$f]
+        $stampHash = $stampFiles[(DestKey $rel)]
 
         if (-not $dstHash)             { $status = 'MISSING (new in repo, not installed)'; $dirty = $true }
         elseif ($dstHash -eq $srcHash) { $status = 'sync' }
@@ -113,15 +109,15 @@ if ($Check) {
             $dirty = $true
         }
         else                           { $status = 'update-available'; $dirty = $true }
-        "{0,-42} {1}" -f $f, $status | Write-Host
+        "{0,-42} {1}" -f $rel, $status | Write-Host
     }
     # Orphans: files we installed that are no longer in the repo
-    foreach ($f in $stampFiles.Keys) {
-        if (-not $Manifest.Contains($f)) {
-            $dst = Join-Path $DevinHome ($f -replace '/', '\')
+    foreach ($d in $stampFiles.Keys) {
+        if (-not $manifestDest.ContainsKey($d)) {
+            $dst = Join-Path $DevinHome ($d -replace '/', '\')
             if (Test-Path $dst) {
-                $s = if ((Sha256 $dst) -eq $stampFiles[$f]) { 'removed-in-repo (install will delete)' } else { 'removed-in-repo + locally-modified (install keeps a .bak)' }
-                "{0,-42} {1}" -f $f, $s | Write-Host; $dirty = $true
+                $s = if ((Sha256 $dst) -eq $stampFiles[$d]) { 'removed-in-repo (install will delete)' } else { 'removed-in-repo + locally-modified (install keeps a .bak)' }
+                "{0,-42} {1}" -f $d, $s | Write-Host; $dirty = $true
             }
         }
     }
@@ -145,7 +141,7 @@ if ($allSync) {
         $dst = Join-Path $DevinHome $Manifest[$f]
         if (-not (Test-Path $dst) -or (Sha256 $dst) -ne (Sha256 (Join-Path $RepoRoot ($f -replace '/', '\')))) { $allSync = $false; break }
     }
-    if ($allSync -and ($stampFiles.Keys | Where-Object { -not $Manifest.Contains($_) })) { $allSync = $false }
+    if ($allSync -and ($stampFiles.Keys | Where-Object { -not $manifestDest.ContainsKey($_) })) { $allSync = $false }
 }
 if ($allSync -and -not $SetBypass) {
     Write-Host "Already in sync (v$RepoVersion) - nothing to do." -ForegroundColor Green
@@ -154,28 +150,29 @@ if ($allSync -and -not $SetBypass) {
 
 Step "Copying files -> $DevinHome"
 foreach ($f in $Manifest.Keys) {
+    $rel = $Manifest[$f]
     $src = Join-Path $RepoRoot ($f -replace '/', '\')
-    $dst = Join-Path $DevinHome $Manifest[$f]
-    if ((Test-Path $dst) -and -not $stampFiles[$f] -and (Sha256 $dst) -ne (Sha256 $src)) {
+    $dst = Join-Path $DevinHome $rel
+    if ((Test-Path $dst) -and -not $stampFiles[(DestKey $rel)] -and (Sha256 $dst) -ne (Sha256 $src)) {
         Copy-Item $dst "$dst.bak-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-        Write-Host "  ! $f had unmanaged content -> .bak kept"
+        Write-Host "  ! $rel had unmanaged content -> .bak kept"
     }
     New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
     Copy-Item $src $dst -Force
-    Write-Host "  + $f"
+    Write-Host "  + $rel"
 }
 
-# --- Orphan cleanup: installed by us, gone from repo ---------------------------
-foreach ($f in $stampFiles.Keys) {
-    if (-not $Manifest.Contains($f)) {
-        $dst = Join-Path $DevinHome ($f -replace '/', '\')
+# --- Orphan cleanup ------------------------------------------------------------
+foreach ($d in $stampFiles.Keys) {
+    if (-not $manifestDest.ContainsKey($d)) {
+        $dst = Join-Path $DevinHome ($d -replace '/', '\')
         if (Test-Path $dst) {
-            if ((Sha256 $dst) -eq $stampFiles[$f]) {
+            if ((Sha256 $dst) -eq $stampFiles[$d]) {
                 Remove-Item $dst -Force
-                Write-Host "  - $f (removed in repo)"
+                Write-Host "  - $d (removed in repo)"
             } else {
                 Move-Item $dst "$dst.bak-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-                Write-Host "  ! $f removed in repo but locally modified -> .bak kept"
+                Write-Host "  ! $d removed in repo but locally modified -> .bak kept"
             }
         }
     }
@@ -183,7 +180,7 @@ foreach ($f in $stampFiles.Keys) {
 
 Step 'Merging config.json'
 $cfgPath = Join-Path $DevinHome 'config.json'
-$managed = Get-Content "$RepoRoot\config.managed.json" -Raw | ConvertFrom-Json
+$managed = Get-Content "$RepoRoot\devin-home\config.managed.json" -Raw | ConvertFrom-Json
 if (Test-Path $cfgPath) {
     $cfg = Get-Content $cfgPath -Raw | ConvertFrom-Json
     Copy-Item $cfgPath "$cfgPath.bak-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
@@ -205,7 +202,7 @@ if ($SetBypass) {
 # --- Write install stamp -------------------------------------------------------
 Step 'Writing install stamp'
 $files = @{}
-foreach ($f in $Manifest.Keys) { $files[$f] = (Sha256 (Join-Path $DevinHome $Manifest[$f])) }
+foreach ($f in $Manifest.Keys) { $files[(DestKey $Manifest[$f])] = (Sha256 (Join-Path $DevinHome $Manifest[$f])) }
 $gitSha = $null
 if (Test-Path (Join-Path $RepoRoot '.git')) { $gitSha = (git -C $RepoRoot rev-parse HEAD 2>$null) }
 @{
