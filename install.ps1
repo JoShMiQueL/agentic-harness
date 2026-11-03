@@ -43,8 +43,9 @@ function Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Sha256($p) { (Get-FileHash $p -Algorithm SHA256 -ErrorAction Stop).Hash.ToLower() }
 
 # --- Discover manifest: repo-relative -> $DevinHome-relative ------------------
-$RepoRoot = $PSScriptRoot
-$localRepo = Test-Path (Join-Path $RepoRoot 'agents\scout.md')
+# NOTE: under `irm | iex` there is no script file, so $PSScriptRoot is empty.
+$RepoRoot = if ($PSScriptRoot) { $PSScriptRoot } else { $env:TEMP }
+$localRepo = [bool]$PSScriptRoot -and (Test-Path (Join-Path $RepoRoot 'agents\scout.md'))
 $Manifest = [ordered]@{}
 
 if ($localRepo) {
