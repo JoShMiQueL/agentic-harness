@@ -38,6 +38,8 @@ def main():
     ap.add_argument('--dry-run', action='store_true')
     ap.add_argument('--devin-home', default=str(default_home()))
     ap.add_argument('--branch', default='main')
+    ap.add_argument('--set-bypass', action='store_true',
+                    help='set DEVIN_PERMISSION_MODE=dangerous for the current user')
     a = ap.parse_args()
     home = Path(a.devin_home)
 
@@ -128,6 +130,14 @@ def main():
     cfg['permissions'], cfg['hooks'] = managed['permissions'], managed['hooks']
     cfg_path.write_text(json.dumps(cfg, indent=2) + '\n')
     print('  + config.json: permissions + hooks merged')
+
+    if a.set_bypass:
+        if sys.platform == 'win32':
+            subprocess.run(['setx', 'DEVIN_PERMISSION_MODE', 'dangerous'],
+                           capture_output=True)
+            print('  + DEVIN_PERMISSION_MODE=dangerous (user env)')
+        else:
+            print('  i bypass mode: export DEVIN_PERMISSION_MODE=dangerous in your shell rc')
 
     files_hash = {rel: sha256(home / rel) for rel in manifest}
     stamp_path.write_text(json.dumps({

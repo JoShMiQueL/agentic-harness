@@ -12,7 +12,7 @@ structured `REPORT` block, keeping the parent's context small.
 ```
 devin-agentic/                       <- the repo
 ├── AGENTS.md                        # PROJECT rules (for working on this repo)
-├── README.md  install.ps1  uninstall.ps1  VERSION
+├── README.md  install.py  uninstall.py  install.*  uninstall.*  VERSION
 └── devin-home/                      # payload — maps 1:1 onto %APPDATA%\devin\
     ├── AGENTS.md                    # global always-on rules (orchestration policy)
     ├── config.managed.json          # permissions + hooks merged into config.json
@@ -63,7 +63,7 @@ The installer is **idempotent**: it backs up `AGENTS.md`/`config.json` to
 (`permissions`, `hooks`) — your `org_id`, credentials and model prefs survive.
 Re-run it after every `git pull`.
 
-**Uninstall:** `.\uninstall.ps1` (removes installed files + the `hooks` key;
+**Uninstall:** `python uninstall.py` (removes installed files + the `hooks` key;
 restore a `config.json.bak-*` to fully revert).
 
 ## Updates & sync check
@@ -73,8 +73,8 @@ SHA256 of each installed file). To know whether you are in sync with the
 repo, run a check:
 
 ```powershell
-.\install.ps1 -Check   # from a clone
-iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } -Check"   # remote
+python install.py --check                      # from a clone
+iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } --check"   # remote
 ```
 
 Per-file statuses:
@@ -88,7 +88,7 @@ Per-file statuses:
 | `MISSING (new in repo, not installed)` | File added to the repo, not installed yet |
 | `removed-in-repo` | Was installed, deleted from repo — install cleans it (`.bak` kept if locally modified) |
 
-Workflow: `git pull` (or bump `VERSION` on GitHub) → `-Check` shows
+Workflow: `git pull` (or bump `VERSION` on GitHub) -> `--check` shows
 `update-available` → run the install one-liner → back to `sync`.
 
 ## How it works
@@ -127,15 +127,15 @@ single-session work.
 
 ### Hooks = hard policy
 
-Hooks live in `hooks/*.ps1` (not inline in config) and are wired globally in
+Hooks live in `hooks/*.py` (not inline in config) and are wired globally in
 `config.json → hooks`. They fire in **every permission mode**, including
 `dangerous` (verified). Each script reads the event JSON on stdin and emits
 `{"decision":"block"}` on stdout to deny.
 
 | Script | Event | Behavior |
 |---|---|---|
-| `pre-tool-guard.ps1` | `PreToolUse` (all tools) | `exec`: blocks `rm -rf`, `Remove-Item -Recurse`, `del /s /q`, `format`, `dd`, `git push -f`, `reset --hard`, `clean -f`. `read/write/edit`: blocks `.env*`, `id_rsa*`, `*.pem`, `*.key`, `credentials.toml` |
-| `session-start-memory.ps1` | `SessionStart` | Injects `.devin/memory/state.md` as `additionalContext` if present |
+| `pre_tool_guard.py` | `PreToolUse` (all tools) | `exec`: blocks `rm -rf`, `Remove-Item -Recurse`, `del /s /q`, `format`, `dd`, `git push -f`, `reset --hard`, `clean -f`. `read/write/edit`: blocks `.env*`, `id_rsa*`, `*.pem`, `*.key`, `credentials.toml` |
+| `session_start_memory.py` | `SessionStart` | Injects `.devin/memory/state.md` as `additionalContext` if present |
 
 ### Permissions & bypass mode
 
@@ -145,7 +145,7 @@ can't prompt). The safety net is the guard script + `deny` on secret reads +
 `ask` on `.env` writes.
 
 I run `DEVIN_PERMISSION_MODE=dangerous` as a user env var (set it with
-`install.ps1 -SetBypass`), so hooks are the real enforcement layer.
+`install.py --set-bypass`), so hooks are the real enforcement layer.
 Per-session override: `devin --permission-mode auto`.
 
 ## Customizing (for future me)
@@ -155,31 +155,27 @@ Per-session override: `devin --permission-mode auto`.
 | New subagent profile | `devin-home/agents/<name>.md` — YAML frontmatter (`name`, `description`, `model`, `allowed-tools`, `max-nesting`) + body = system prompt. End it with the REPORT block. |
 | Change a model | `model:` in the profile. Check `devin models` for slugs. Note: `subagent_general` inherits the parent's model (expensive); custom profiles don't. |
 | Tune the guard | Edit the regexes in `devin-home/hooks/pre_tool_guard.py` — no config change needed. |
-| New lifecycle hook | Write `devin-home/hooks/<name>.py`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
+| New lifecycle hook | Write `devin-home/hooks/<name>.py`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.py`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
 | Debug hooks | `/hooks` inside a session lists loaded hooks. `devin doctor` validates agent profiles. |
 
 ## Developing / testing without touching your real env
 
 ```powershell
-.\install.ps1 -WhatIf                                  # dry-run: prints plan only
-.\install.ps1 -DevinHome .\sandbox\devin               # full install into a sandbox
+python install.py --dry-run                            # dry-run: prints plan only
+python install.py --devin-home ./sandbox/devin         # full install into a sandbox
 $env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin doctor # real validation vs sandbox
 $env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin -p "use the scout subagent ..."
 ```
 
 `DEVIN_DATA_DIR` redirects Devin CLI's whole data dir — skills, agents, hooks,
 sessions — so everything works for real against the sandbox while your real
-`%APPDATA%\devin` stays untouched. `-Check` and the stamp honor `-DevinHome`
-too (`.\install.ps1 -DevinHome .\sandbox\devin -Check`).
+`%APPDATA%\devin` stays untouched. `--check` and the stamp honor `--devin-home` too (`python install.py --devin-home ./sandbox/devin --check`).
 
-On Linux/macOS the layout is `~/.config/devin/`; `pwsh` is cross-platform so
-the same installer and hook scripts work — test bash/WSL variants the same
-way with `DEVIN_HOME=./sandbox/devin`.
+On Linux/macOS the layout is `~/.config/devin/` and the same python installer + hooks work - test bash/WSL variants the same way with `--devin-home ./sandbox/devin`.
 
 ## Notes
 
-- Works on Windows (pwsh). On Linux/macOS the same layout applies under
-  `~/.config/devin/` and everything runs on python3 - no pwsh needed.
+- Everything runs on python3 (`python` on Windows). No pwsh dependency anywhere.
 - NEVER commit `credentials.toml`, `.env*`, or your `org_id` — the
   `.gitignore` and `config.managed.json` (a fragment, not a full copy of
   your real config) exist precisely for that.
