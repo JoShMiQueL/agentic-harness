@@ -58,7 +58,6 @@ gh repo clone JoShMiQueL/devin-agentic && cd devin-agentic && python install.py
 python install.py --devin-home ./sandbox/devin   # install into a sandbox
 python install.py --check                        # sync status
 ```
-```
 
 The installer is **idempotent**: it backs up `AGENTS.md`/`config.json` to
 `*.bak-<timestamp>` before overwriting and merges only the managed keys
