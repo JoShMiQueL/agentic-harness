@@ -71,7 +71,8 @@ Per-file statuses:
 | `update-available` | Repo changed; local untouched — run install to update |
 | `locally-modified` | You edited the installed file by hand (vs. install stamp) |
 | `locally-modified (+remote update pending)` | Both diverged — install will overwrite your local edit |
-| `MISSING` | File expected but not installed |
+| `MISSING (new in repo, not installed)` | File added to the repo, not installed yet |
+| `removed-in-repo` | Was installed, deleted from repo — install cleans it (`.bak` kept if locally modified) |
 
 Workflow: `git pull` (or bump `VERSION` on GitHub) → `-Check` shows
 `update-available` → run the install one-liner → back to `sync`.
