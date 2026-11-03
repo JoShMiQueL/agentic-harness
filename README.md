@@ -43,7 +43,7 @@ temp dir, then installs. No `gh` or git required.
 **Windows cmd:**
 
 ```cmd
-powershell -NoProfile -Command "irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 ^| iex"
+curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 **Unix one-liner (curl | bash, requires python3 for the config merge):**

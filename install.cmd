@@ -1,14 +1,14 @@
 @echo off
-rem devin-agentic installer for cmd.exe — thin wrapper over install.ps1.
-rem One-liner equivalent:
-rem   powershell -NoProfile -Command "irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex"
+rem devin-agentic installer for cmd.exe — self-bootstrapping wrapper.
+rem Remote one-liner:
+rem   curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.cmd -o install.cmd && install.cmd && del install.cmd
 setlocal
-set "PS=%~dp0install.ps1"
-if not exist "%PS%" (
-  echo install.ps1 not found next to this script. Use the powershell one-liner instead:
-  echo   powershell -NoProfile -Command "irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 ^| iex"
-  exit /b 1
+set "PS1=%~dp0install.ps1"
+if not exist "%PS1%" (
+  set "PS1=%TEMP%\devin-agentic-install.ps1"
+  curl -fsSL "https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1" -o "%PS1%" || (
+    echo download of install.ps1 failed >&2 & exit /b 1 )
 )
 where pwsh >nul 2>&1 && (set "SH=pwsh") || (set "SH=powershell")
-"%SH%" -NoProfile -ExecutionPolicy Bypass -File "%PS%" %*
+"%SH%" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" %*
 exit /b %errorlevel%
