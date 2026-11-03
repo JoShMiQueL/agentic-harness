@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   install-smoke:
     runs-on: ${{ matrix.os }}
@@ -12,7 +19,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Compile python sources
         run: python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in ['install.py', 'uninstall.py'] + glob.glob('devin-home/hooks/*.py')]"
