@@ -16,10 +16,10 @@
 
     - Install from a clone:   .\install.ps1
     - Install remote (one-liner):
-        irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1 | iex
+        irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex
     - Check sync status:
         .\install.ps1 -Check
-        iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } -Check"
+        iex "& { $(irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1) } -Check"
 
     Install stamp: %APPDATA%\devin\agentic.json (version + SHA256 per file).
 #>
@@ -32,6 +32,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $RepoSlug = 'JoShMiQueL/devin-agentic'
 $RepoUrl = "https://raw.githubusercontent.com/$RepoSlug/$Branch"
+# raw.githubusercontent.com caches per-path for minutes; pin downloads to the
+# actual commit SHA (immutable URL, always fresh) resolved via the API.
+$GhHeaders = @{ 'User-Agent' = 'devin-agentic' }
 $DevinHome = Join-Path $env:APPDATA 'devin'
 $DevinExe = Join-Path $env:LOCALAPPDATA 'devin\cli\bin\devin.exe'
 $StampPath = Join-Path $DevinHome 'agentic.json'
@@ -64,7 +67,9 @@ if ($localRepo) {
 }
 else {
     Step 'Resolving remote file list'
-    $tree = (Invoke-RestMethod "https://api.github.com/repos/$RepoSlug/git/trees/$Branch`?recursive=1" -Headers @{ 'User-Agent' = 'devin-agentic' }).tree
+    $sha = (Invoke-RestMethod "https://api.github.com/repos/$RepoSlug/commits/$Branch" -Headers $GhHeaders).sha
+    $RepoUrl = "https://raw.githubusercontent.com/$RepoSlug/$sha"
+    $tree = (Invoke-RestMethod "https://api.github.com/repos/$RepoSlug/git/trees/$sha`?recursive=1" -Headers $GhHeaders).tree
     $remote = $tree | Where-Object {
         $_.type -eq 'blob' -and ($_.path -match '^(' + ($SyncDirs -join '|') + ')/' -or $TopFiles -contains $_.path -or $MergedFiles -contains $_.path)
     } | ForEach-Object { $_.path }

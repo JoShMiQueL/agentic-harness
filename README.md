@@ -31,7 +31,7 @@ Requires [Devin CLI](https://docs.devin.ai/cli) (`devin.exe`) and PowerShell 5+.
 **One-liner (remote bootstrap):**
 
 ```powershell
-irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1 | iex
+irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex
 ```
 
 The script detects it is running from a URL, downloads the full file set to a
@@ -60,7 +60,7 @@ repo, run a check:
 
 ```powershell
 .\install.ps1 -Check   # from a clone
-iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } -Check"   # remote
+iex "& { $(irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1) } -Check"   # remote
 ```
 
 Per-file statuses:
