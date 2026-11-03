@@ -1,0 +1,44 @@
+{
+  "$schema-note": "install.ps1 merges these keys into %APPDATA%/devin/config.json — never commit credentials.toml or org_id",
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Write(**)",
+      "Edit(**)",
+      "Exec(**)"
+    ],
+    "deny": [
+      "Read(**/.env*)",
+      "Read(**/id_rsa*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)"
+    ],
+    "ask": [
+      "Write(**/.env*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File \"$env:APPDATA\\devin\\hooks\\pre-tool-guard.ps1\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File \"$env:APPDATA\\devin\\hooks\\session-start-memory.ps1\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

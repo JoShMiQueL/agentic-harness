@@ -1,0 +1,12 @@
+# OS junk
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Installer backups (never in repo anyway, but just in case)
+*.bak-*
+
+# Devin secrets — NEVER commit
+credentials.toml
+.env
+.env.*
