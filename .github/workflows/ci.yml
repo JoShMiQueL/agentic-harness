@@ -35,20 +35,20 @@ jobs:
           EOF
 
       - name: Install into sandbox
-        run: python install.py --devin-home "$RUNNER_TEMP/devin-sb"
+        run: python install.py --devin-home "${{ runner.temp }}/devin-sb"
 
       - name: Sync check
-        run: python install.py --devin-home "$RUNNER_TEMP/devin-sb" --check
+        run: python install.py --devin-home "${{ runner.temp }}/devin-sb" --check
 
       - name: Re-install is a no-op
         run: |
-          out=$(python install.py --devin-home "$RUNNER_TEMP/devin-sb")
+          out=$(python install.py --devin-home "${{ runner.temp }}/devin-sb")
           echo "$out" | grep -q "Already in sync" || { echo "$out"; exit 1; }
         shell: bash
 
       - name: Uninstall leaves it clean
         run: |
-          python uninstall.py --devin-home "$RUNNER_TEMP/devin-sb"
-          test ! -f "$RUNNER_TEMP/devin-sb/agentic.json"
-          test ! -f "$RUNNER_TEMP/devin-sb/AGENTS.md"
+          python uninstall.py --devin-home "${{ runner.temp }}/devin-sb"
+          test ! -f "${{ runner.temp }}/devin-sb/agentic.json"
+          test ! -f "${{ runner.temp }}/devin-sb/AGENTS.md"
         shell: bash
