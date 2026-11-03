@@ -52,6 +52,30 @@ Re-run it after every `git pull`.
 **Uninstall:** `.\uninstall.ps1` (removes installed files + the `hooks` key;
 restore a `config.json.bak-*` to fully revert).
 
+## Updates & sync check
+
+Every install writes a stamp at `%APPDATA%\devin\agentic.json` (version +
+SHA256 of each installed file). To know whether you are in sync with the
+repo, run a check:
+
+```powershell
+.\install.ps1 -Check   # from a clone
+iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } -Check"   # remote
+```
+
+Per-file statuses:
+
+| Status | Meaning |
+|---|---|
+| `sync` | Installed file matches the repo |
+| `update-available` | Repo changed; local untouched — run install to update |
+| `locally-modified` | You edited the installed file by hand (vs. install stamp) |
+| `locally-modified (+remote update pending)` | Both diverged — install will overwrite your local edit |
+| `MISSING` | File expected but not installed |
+
+Workflow: `git pull` (or bump `VERSION` on GitHub) → `-Check` shows
+`update-available` → run the install one-liner → back to `sync`.
+
 ## How it works
 
 ### Delegation

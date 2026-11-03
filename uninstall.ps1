@@ -17,7 +17,7 @@ foreach ($f in 'scout.md', 'tester.md', 'reviewer.md', 'worker.md') {
 }
 Remove-Item "$DevinHome\skills\orchestrate" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item "$DevinHome\hooks\pre-tool-guard.ps1", "$DevinHome\hooks\session-start-memory.ps1" -Force -ErrorAction SilentlyContinue
-Remove-Item "$DevinHome\AGENTS.md" -Force -ErrorAction SilentlyContinue
+Remove-Item "$DevinHome\AGENTS.md", "$DevinHome\agentic.json" -Force -ErrorAction SilentlyContinue
 
 $cfgPath = Join-Path $DevinHome 'config.json'
 if (Test-Path $cfgPath) {
