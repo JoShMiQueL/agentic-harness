@@ -28,17 +28,20 @@ structured `REPORT` block, keeping the parent's context small.
 
 Requires [Devin CLI](https://docs.devin.ai/cli) (`devin.exe`) and PowerShell 5+.
 
-**One-liner (clone + install):**
+**One-liner (remote bootstrap):**
 
 ```powershell
-gh repo clone JoShMiQueL/devin-agentic "$env:TEMP\devin-agentic"; & "$env:TEMP\devin-agentic\install.ps1"
+irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1 | iex
 ```
 
-**From a local copy:**
+The script detects it is running from a URL, downloads the full file set to a
+temp dir, then installs. No `gh` or git required.
+
+**Alternative (clone + install):**
 
 ```powershell
-.\install.ps1              # install
-.\install.ps1 -SetBypass   # install + default every session to bypass mode
+gh repo clone JoShMiQueL/devin-agentic; & .\devin-agentic\install.ps1
+.\install.ps1 -SetBypass   # also default every session to bypass mode
 ```
 
 The installer is **idempotent**: it backs up `AGENTS.md`/`config.json` to
