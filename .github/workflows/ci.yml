@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile python sources
-        run: python -m py_compile install.py uninstall.py devin-home/hooks/*.py
+        run: python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in ['install.py', 'uninstall.py'] + glob.glob('devin-home/hooks/*.py')]"
 
       - name: Validate managed config JSON
         run: python -c "import json; d=json.load(open('devin-home/config.managed.json')); assert 'permissions' in d and 'hooks' in d"
