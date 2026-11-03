@@ -40,6 +40,12 @@ irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex
 The script detects it is running from a URL, downloads the full file set to a
 temp dir, then installs. No `gh` or git required.
 
+**Unix one-liner (curl | bash, requires python3 for the config merge):**
+
+```bash
+curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.sh | bash
+```
+
 **Alternative (clone + install):**
 
 ```powershell
