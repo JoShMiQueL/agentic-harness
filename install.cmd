@@ -3,8 +3,9 @@ rem devin-agentic installer for cmd.exe — self-bootstrapping wrapper.
 rem Remote one-liner:
 rem   curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.cmd -o install.cmd && install.cmd && del install.cmd
 setlocal
-set "PS1=%~dp0install.ps1"
-if not exist "%PS1%" (
+if exist "%~dp0devin-home\agents" (
+  set "PS1=%~dp0install.ps1"
+) else (
   set "PS1=%TEMP%\devin-agentic-install.ps1"
   curl -fsSL "https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1" -o "%PS1%" || (
     echo download of install.ps1 failed >&2 & exit /b 1 )
