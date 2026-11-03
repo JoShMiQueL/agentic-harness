@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File \"$env:APPDATA\\devin\\hooks\\pre-tool-guard.ps1\"",
+            "command": "{{PY}} \"{{DEVIN_HOME}}/hooks/pre_tool_guard.py\"",
             "timeout": 5
           }
         ]
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File \"$env:APPDATA\\devin\\hooks\\session-start-memory.ps1\"",
+            "command": "{{PY}} \"{{DEVIN_HOME}}/hooks/session_start_memory.py\"",
             "timeout": 5
           }
         ]

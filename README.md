@@ -23,8 +23,8 @@ devin-agentic/                       <- the repo
     │   └── worker.md                # scoped implementation       (swe-2-max)
     ├── skills\orchestrate\SKILL.md  # /orchestrate — full delegation contract
     └── hooks\
-        ├── pre-tool-guard.ps1       # PreToolUse: destructive cmds + secrets
-        └── session-start-memory.ps1 # SessionStart: .devin/memory/state.md
+        ├── pre_tool_guard.py        # PreToolUse: destructive cmds + secrets
+        └── session_start_memory.py  # SessionStart: .devin/memory/state.md
 ```
 
 ## Install
@@ -155,8 +155,8 @@ Per-session override: `devin --permission-mode auto`.
 |---|---|
 | New subagent profile | `devin-home/agents/<name>.md` — YAML frontmatter (`name`, `description`, `model`, `allowed-tools`, `max-nesting`) + body = system prompt. End it with the REPORT block. |
 | Change a model | `model:` in the profile. Check `devin models` for slugs. Note: `subagent_general` inherits the parent's model (expensive); custom profiles don't. |
-| Tune the guard | Edit the regexes in `devin-home/hooks/pre-tool-guard.ps1` — no config change needed. |
-| New lifecycle hook | Write `devin-home/hooks/<name>.ps1`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
+| Tune the guard | Edit the regexes in `devin-home/hooks/pre_tool_guard.py` — no config change needed. |
+| New lifecycle hook | Write `devin-home/hooks/<name>.py`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.ps1`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
 | Debug hooks | `/hooks` inside a session lists loaded hooks. `devin doctor` validates agent profiles. |
 
 ## Developing / testing without touching your real env
@@ -180,8 +180,7 @@ way with `DEVIN_HOME=./sandbox/devin`.
 ## Notes
 
 - Works on Windows (pwsh). On Linux/macOS the same layout applies under
-  `~/.config/devin/` and `pwsh` is cross-platform, so the hook scripts and
-  installer run unchanged — only the home path differs.
+  `~/.config/devin/` and everything runs on python3 - no pwsh needed.
 - NEVER commit `credentials.toml`, `.env*`, or your `org_id` — the
   `.gitignore` and `config.managed.json` (a fragment, not a full copy of
   your real config) exist precisely for that.

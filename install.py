@@ -109,7 +109,10 @@ def main():
             print(f'  ! {d} removed in repo but locally modified -> .bak kept')
 
     cfg_path = home / 'config.json'
-    managed = json.loads((root / SRC / 'config.managed.json').read_text())
+    # placeholders resolved at install time -> absolute paths per machine
+    py = 'python' if sys.platform == 'win32' else 'python3'
+    managed_raw = (root / SRC / 'config.managed.json').read_text()
+    managed = json.loads(managed_raw.replace('{{DEVIN_HOME}}', home.as_posix()).replace('{{PY}}', py))
     if cfg_path.is_file():
         shutil.copy2(cfg_path, str(cfg_path) + '.bak')
         cfg = json.loads(cfg_path.read_text())
