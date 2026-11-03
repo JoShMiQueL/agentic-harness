@@ -92,6 +92,13 @@ def main():
         print('\n' + ('Run install to converge.' if dirty else 'Everything in sync.'))
         return
 
+    # --- short-circuit: already in sync -----------------------------------------
+    if stamp.get('version') == version and not orphans and all(
+            (home / rel).is_file() and sha256(home / rel) == sha256(src)
+            for rel, src in manifest.items()):
+        print(f'Already in sync (v{version}) - nothing to do.')
+        return
+
     # --- install ----------------------------------------------------------------
     print(f'==> Installing -> {home} (v{version})')
     home.mkdir(parents=True, exist_ok=True)
