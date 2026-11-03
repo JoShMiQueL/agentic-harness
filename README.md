@@ -29,24 +29,23 @@ devin-agentic/                       <- the repo
 
 ## Install
 
-Requires [Devin CLI](https://docs.devin.ai/cli) (`devin.exe`) and PowerShell 5+.
+Requires [Devin CLI](https://docs.devin.ai/cli) and **Python 3**
+(`python` on Windows, `python3` on Linux/macOS). Every entry point is a thin
+shim that downloads and runs `install.py` — one installer, all platforms.
 
-**One-liner (remote bootstrap):**
+**Windows — PowerShell:**
 
 ```powershell
 irm https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.ps1 | iex
 ```
 
-The script detects it is running from a URL, downloads the full file set to a
-temp dir, then installs. No `gh` or git required.
-
-**Windows cmd:**
+**Windows — cmd.exe:**
 
 ```cmd
 curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
-**Unix one-liner (curl | bash, requires python3 for the config merge):**
+**Linux / macOS — bash:**
 
 ```bash
 curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.sh | bash
@@ -54,9 +53,11 @@ curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.sh 
 
 **Alternative (clone + install):**
 
-```powershell
-gh repo clone JoShMiQueL/devin-agentic; & .\devin-agentic\install.ps1
-.\install.ps1 -SetBypass   # also default every session to bypass mode
+```bash
+gh repo clone JoShMiQueL/devin-agentic && cd devin-agentic && python install.py
+python install.py --devin-home ./sandbox/devin   # install into a sandbox
+python install.py --check                        # sync status
+```
 ```
 
 The installer is **idempotent**: it backs up `AGENTS.md`/`config.json` to
