@@ -70,8 +70,10 @@ else {
         $dst = Join-Path $RepoRoot ($f -replace '/', '\')
         New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
         Invoke-WebRequest "$RepoUrl/$f" -OutFile $dst -UseBasicParsing
-        $rel = $f.Substring($SrcHome.Length + 1)
-        if ($rel -ne 'config.managed.json' -and $f -ne 'VERSION') { $Manifest[$f] = ($rel -replace '/', '\') }
+        if ($f.StartsWith("$SrcHome/")) {
+            $rel = $f.Substring($SrcHome.Length + 1)
+            if ($rel -ne 'config.managed.json') { $Manifest[$f] = ($rel -replace '/', '\') }
+        }
         if (-not $Check) { Write-Host "  + $f" }
     }
 }
