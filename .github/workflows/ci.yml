@@ -21,6 +21,7 @@ jobs:
         run: python -c "import json; d=json.load(open('devin-home/config.managed.json')); assert 'permissions' in d and 'hooks' in d"
 
       - name: Validate agent profiles frontmatter
+        shell: bash
         run: |
           python - <<'EOF'
           import glob, re, sys
