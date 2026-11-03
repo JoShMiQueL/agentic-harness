@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  install-smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile python sources
+        run: python -m py_compile install.py uninstall.py devin-home/hooks/*.py
+
+      - name: Validate managed config JSON
+        run: python -c "import json; d=json.load(open('devin-home/config.managed.json')); assert 'permissions' in d and 'hooks' in d"
+
+      - name: Validate agent profiles frontmatter
+        run: |
+          python - <<'EOF'
+          import glob, re, sys
+          for f in glob.glob('devin-home/agents/*.md'):
+              t = open(f, encoding='utf-8').read()
+              assert t.startswith('---'), f'{f}: missing frontmatter'
+              fm = t.split('---')[1]
+              for k in ('name', 'description', 'model'):
+                  assert re.search(rf'^{k}:', fm, re.M), f'{f}: missing {k}'
+          print('profiles ok')
+          EOF
+
+      - name: Install into sandbox
+        run: python install.py --devin-home "$RUNNER_TEMP/devin-sb"
+
+      - name: Sync check
+        run: python install.py --devin-home "$RUNNER_TEMP/devin-sb" --check
+
+      - name: Re-install is a no-op
+        run: |
+          out=$(python install.py --devin-home "$RUNNER_TEMP/devin-sb")
+          echo "$out" | grep -q "Already in sync" || { echo "$out"; exit 1; }
+        shell: bash
+
+      - name: Uninstall leaves it clean
+        run: |
+          python uninstall.py --devin-home "$RUNNER_TEMP/devin-sb"
+          test ! -f "$RUNNER_TEMP/devin-sb/agentic.json"
+          test ! -f "$RUNNER_TEMP/devin-sb/AGENTS.md"
+        shell: bash
