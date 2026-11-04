@@ -44,7 +44,7 @@ def main():
         r = subprocess.run(
             [exe, '-p', PROBE, '--permission-mode', 'auto'],
             capture_output=True, text=True, env=env, cwd=ROOT,
-            timeout=180)
+            timeout=180, stdin=subprocess.DEVNULL)
         out = r.stdout + r.stderr
         ok = 'status: ok' in out and 'REPORT' in out
         print(out if os.environ.get('VERBOSE') else out[-800:])
