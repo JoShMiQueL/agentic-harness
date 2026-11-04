@@ -38,10 +38,6 @@ def start_proxy(workdir):
                if token else f'https://github.com/{repo}')
         subprocess.run(['git', 'clone', '--depth', '1', url, pdir],
                        check=True, capture_output=True)
-        # repo root contains devin-proxy/ as a subdirectory
-        cand = Path(pdir) / 'devin-proxy'
-        if cand.is_dir():
-            pdir = str(cand)
     pkg = Path(pdir) / 'src' / 'devin_proxy'
     if not pkg.is_dir():
         cand = list(Path(pdir).rglob('devin_proxy'))
