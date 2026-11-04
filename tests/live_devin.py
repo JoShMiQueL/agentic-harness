@@ -25,8 +25,8 @@ def sandbox_home():
     subprocess.run([PY, str(ROOT / 'install.py'), '--harness', 'devin',
                     '--devin-home', str(sb)], check=True, capture_output=True)
     creds = os.environ.get(DEVIN_CREDS_ENV)
-    if creds:  # CI: materialize from secret
-        (sb / 'credentials.toml').write_text(creds)
+    if creds:  # CI: materialize from secret (secrets lose trailing newlines)
+        (sb / 'credentials.toml').write_text(creds.rstrip('\n') + '\n')
     else:      # local: reuse real creds (they're per-account, not per-dir)
         real = Path(os.environ.get('APPDATA', '')) / 'devin' / 'credentials.toml'
         if not real.is_file():
@@ -43,7 +43,8 @@ def main():
     try:
         r = subprocess.run(
             [exe, '-p', PROBE, '--permission-mode', 'auto'],
-            capture_output=True, text=True, env=env, cwd=ROOT, timeout=600)
+            capture_output=True, text=True, env=env, cwd=ROOT,
+            timeout=180)
         out = r.stdout + r.stderr
         ok = 'status: ok' in out and 'REPORT' in out
         print(out if os.environ.get('VERBOSE') else out[-800:])
