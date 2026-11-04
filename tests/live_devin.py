@@ -59,7 +59,8 @@ def main():
             out = _dec(e.stdout) + _dec(e.stderr) + '\n[TIMEOUT]'
             rc = 'timeout'
         ok = 'status: ok' in out and 'REPORT' in out
-        print(out if os.environ.get('VERBOSE') else out[-800:])
+        tail = out if os.environ.get('VERBOSE') else out[-800:]
+        print(tail.encode('ascii', 'backslashreplace').decode('ascii'))
         print(f'\n{"PASS" if ok else "FAIL"} live devin probe '
               f'(exit={rc}, sandbox={sb})')
         sys.exit(0 if ok else 1)

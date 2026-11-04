@@ -99,11 +99,13 @@ def main():
         r = subprocess.run(
             [exe, 'run', '--standalone', '--auto', '--print-logs',
              '--agent', 'orchestrator', PROBE],
-            capture_output=True, text=True, env=env,
+            capture_output=True, env=env, stdin=subprocess.DEVNULL,
             cwd=tempfile.mkdtemp(), timeout=900)  # bare cwd: no project config
-        out = r.stdout + r.stderr
+        out = (r.stdout or b'').decode('utf-8', 'replace') + \
+              (r.stderr or b'').decode('utf-8', 'replace')
         ok = 'status: ok' in out or 'REPORT' in out
-        print(out if os.environ.get('VERBOSE') else out[-800:])
+        tail = out if os.environ.get('VERBOSE') else out[-800:]
+        print(tail.encode('ascii', 'backslashreplace').decode('ascii'))
         print(f'\n{"PASS" if ok else "FAIL"} live opencode probe '
               f'(exit={r.returncode}, sandbox={sb})')
         sys.exit(0 if ok else 1)
