@@ -95,9 +95,22 @@ jobs:
 
       - name: Install Devin CLI
         run: |
-          $ProgressPreference='SilentlyContinue'
-          irm https://cli.devin.ai/install.ps1 | iex
+          # setup.ps1 ends with interactive `devin setup` — do the bundle
+          # install part manually so the step stays non-interactive.
+          $ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue'
+          $m = (irm https://static.devin.ai/cli/current/manifest.json)
+          $p = $m.platforms.'x86_64-pc-windows'
+          $zip = "$env:TEMP\devin-$($m.version).zip"
+          Invoke-WebRequest $p.url -OutFile $zip -UseBasicParsing
+          if ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() -ne $p.sha256.ToLower()) { throw 'sha256 mismatch' }
+          $ver = "$env:LOCALAPPDATA\devin\cli\_versions\$($m.version)"
+          $tmp = "$env:TEMP\devin-extract"
+          Expand-Archive $zip $tmp -Force
+          New-Item -ItemType Directory -Path $ver,$env:LOCALAPPDATA\devin\cli\bin -Force | Out-Null
+          Copy-Item "$tmp\*" $ver -Recurse -Force
+          Copy-Item "$ver\bin\devin.exe" "$env:LOCALAPPDATA\devin\cli\bin\devin.exe" -Force
           echo "$env:LOCALAPPDATA\devin\cli\bin" >> $env:GITHUB_PATH
+          & "$env:LOCALAPPDATA\devin\cli\bin\devin.exe" version
 
       - name: Install OpenCode CLI
         run: |
