@@ -41,15 +41,19 @@ def main():
     exe = shutil.which('devin') or shutil.which('devin.exe') or 'devin'
     env = dict(os.environ, DEVIN_DATA_DIR=str(sb))
     try:
-        r = subprocess.run(
-            [exe, '-p', PROBE, '--permission-mode', 'auto'],
-            capture_output=True, text=True, env=env, cwd=ROOT,
-            timeout=180, stdin=subprocess.DEVNULL)
-        out = r.stdout + r.stderr
+        try:
+            r = subprocess.run(
+                [exe, '-p', PROBE, '--permission-mode', 'auto'],
+                capture_output=True, text=True, env=env, cwd=ROOT,
+                timeout=180, stdin=subprocess.DEVNULL)
+            out = r.stdout + r.stderr
+        except subprocess.TimeoutExpired as e:
+            out = (e.stdout or '') + (e.stderr or '') + '\n[TIMEOUT]'
         ok = 'status: ok' in out and 'REPORT' in out
         print(out if os.environ.get('VERBOSE') else out[-800:])
+        rc = getattr(r, 'returncode', '?')
         print(f'\n{"PASS" if ok else "FAIL"} live devin probe '
-              f'(exit={r.returncode}, sandbox={sb})')
+              f'(exit={rc}, sandbox={sb})')
         sys.exit(0 if ok else 1)
     finally:
         if not os.environ.get('KEEP_SANDBOX'):
