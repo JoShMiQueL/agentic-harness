@@ -1,105 +1,99 @@
-# devin-agentic
+# agentic-harness
 
-My personal **orchestration layer for [Devin CLI](https://docs.devin.ai/cli)**:
-a global, project-agnostic multi-agent setup — subagent profiles, a delegation
-contract, lifecycle hooks as external scripts, optional memory — installed once
-in `%APPDATA%\devin\` and active in every project.
+My personal **orchestration layer for AI coding CLIs** — one repo, one
+installer, per-harness payloads. Currently supports
+[Devin CLI](https://docs.devin.ai/cli) and [OpenCode](https://opencode.ai):
+global subagent profiles, a delegation contract, a primary orchestrator
+(where the harness allows it), policy enforcement and optional memory —
+installed once and active in every project.
 
-It replaces per-repo agent config: the orchestrator (main agent) delegates work
-to specialized subagents that run in their own context and report back a
-structured `REPORT` block, keeping the parent's context small.
+The main agent delegates work to specialized subagents that run in their own
+context and report back a structured `REPORT` block, keeping the parent's
+context small.
 
 ```
-devin-agentic/                       <- the repo
-├── AGENTS.md                        # PROJECT rules (for working on this repo)
-├── README.md  install.py  uninstall.py  install.*  uninstall.*  VERSION
-└── devin-home/                      # payload — maps 1:1 onto %APPDATA%\devin\
-    ├── AGENTS.md                    # global always-on rules (orchestration policy)
-    ├── config.managed.json          # permissions + hooks merged into config.json
-    ├── agents\
-    │   ├── scout.md                 # read-only research          (swe-2-medium)
-    │   ├── tester.md                # tests/lint/build reports    (swe-2-medium)
-    │   ├── reviewer.md              # diff reviews by severity    (swe-2-high)
-    │   └── worker.md                # scoped implementation       (swe-2-max)
-    ├── skills\orchestrate\SKILL.md  # /orchestrate — full delegation contract
-    └── hooks\
-        ├── pre_tool_guard.py        # PreToolUse: destructive cmds + secrets
-        └── session_start_memory.py  # SessionStart: .devin/memory/state.md
+agentic-harness/                    <- the repo
+├── AGENTS.md  README.md  install.py  uninstall.py  install.*  uninstall.*  VERSION
+└── harnesses/
+    ├── devin/payload/              # -> %APPDATA%\devin
+    │   ├── AGENTS.md               # global rules (delegation policy)
+    │   ├── config.managed.json     # permissions + hooks -> config.json
+    │   ├── agents/                 # scout · tester · reviewer · worker
+    │   ├── skills/orchestrate/     # /orchestrate — delegation contract
+    │   └── hooks/                  # pre_tool_guard.py · session_start_memory.py
+    └── opencode/payload/           # -> ~/.config/opencode
+        ├── AGENTS.md               # global rules (delegation policy)
+        ├── config.managed.json     # default_agent + permission -> opencode.json
+        ├── agents/                 # orchestrator (primary) + 4 subagents
+        ├── skills/orchestration/   # contract, loadable via the skill tool
+        └── plugins/                # agentic-guard.js · agentic-memory.js
 ```
 
 ## Install
 
-Requires [Devin CLI](https://docs.devin.ai/cli) and **Python 3**
-(`python` on Windows, `python3` on Linux/macOS). Every entry point is a thin shim that downloads and runs `install.py` — one installer, all platforms. PowerShell uses raw.githubusercontent.com (jsDelivr serves .ps1 as octet-stream which breaks `iex`); cmd/bash use jsDelivr.
+Requires **Python 3** (`python` on Windows, `python3` on Linux/macOS) plus the
+CLI(s) you want ([Devin CLI](https://docs.devin.ai/cli) /
+[OpenCode](https://opencode.ai)). Every entry point is a thin shim that
+downloads and runs `install.py`. By default `--harness auto` installs for
+every detected CLI; pick one with `--harness devin` or `--harness opencode`.
 
 **Windows — PowerShell:**
 
 ```powershell
-irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/JoShMiQueL/agentic-harness/main/install.ps1 | iex
 ```
 
 **Windows — cmd.exe:**
 
 ```cmd
-curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.cmd -o install.cmd && install.cmd && del install.cmd
+curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/agentic-harness@main/install.cmd -o install.cmd && install.cmd && del install.cmd
 ```
 
 **Linux / macOS — bash:**
 
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/devin-agentic@main/install.sh | bash
+curl -fsSL https://cdn.jsdelivr.net/gh/JoShMiQueL/agentic-harness@main/install.sh | bash
 ```
 
-**Alternative (clone + install):**
+**Clone + install:**
 
 ```bash
-gh repo clone JoShMiQueL/devin-agentic && cd devin-agentic && python install.py
-python install.py --devin-home ./sandbox/devin   # install into a sandbox
-python install.py --check                        # sync status
+gh repo clone JoShMiQueL/agentic-harness && cd agentic-harness && python install.py
+python install.py --harness opencode --opencode-home ./sandbox/oc   # sandbox
+python install.py --check                                          # sync status
 ```
 
-The installer is **idempotent**: it backs up `AGENTS.md`/`config.json` to
-`*.bak-<timestamp>` before overwriting and merges only the managed keys
-(`permissions`, `hooks`) — your `org_id`, credentials and model prefs survive.
-Re-run it after every `git pull`.
+The installer is **idempotent**: it backs up the harness config file before
+overwriting and merges only the managed keys — providers, MCP servers,
+credentials and model prefs survive. Re-run it after every `git pull`.
 
-**Uninstall:** `python uninstall.py` (removes installed files + the `hooks` key;
-restore a `config.json.bak-*` to fully revert).
+**Uninstall:** `python uninstall.py` (auto: only harnesses with an install
+stamp; or `--harness <name>`).
 
 ## Updates & sync check
 
-Every install writes a stamp at `%APPDATA%\devin\agentic.json` (version +
-SHA256 of each installed file). To know whether you are in sync with the
-repo, run a check:
-
-```powershell
-python install.py --check                      # from a clone
-iex "& { $(irm https://raw.githubusercontent.com/JoShMiQueL/devin-agentic/main/install.ps1) } --check"   # remote
-```
-
-Per-file statuses:
+Each harness install writes a stamp at `<home>/agentic.json` (version +
+SHA256 per file). `--check` reports per-file status:
 
 | Status | Meaning |
 |---|---|
 | `sync` | Installed file matches the repo |
 | `update-available` | Repo changed; local untouched — run install to update |
-| `locally-modified` | You edited the installed file by hand (vs. install stamp) |
-| `locally-modified (+remote update pending)` | Both diverged — install will overwrite your local edit |
-| `MISSING (new in repo, not installed)` | File added to the repo, not installed yet |
-| `removed-in-repo` | Was installed, deleted from repo — install cleans it (`.bak` kept if locally modified) |
-
-Workflow: `git pull` (or bump `VERSION` on GitHub) -> `--check` shows
-`update-available` → run the install one-liner → back to `sync`.
+| `locally-modified` | You edited the installed file by hand |
+| `MISSING (new in repo)` | File added to the repo, not installed yet |
+| `removed-in-repo` | Deleted from repo — install cleans it (`.bak` kept if locally modified) |
 
 ## How it works
 
 ### Delegation
 
-The global `AGENTS.md` makes delegation the default policy; the
-`/orchestrate` skill (auto-discovered, shown in `<available_skills>`) carries
-the full manual: which profile for what, how to write self-contained prompts,
-and the memory protocol. You can also just ask in natural language:
-*"use the scout subagent to map the auth flow"*.
+- **devin**: the primary agent can't be replaced, so the global `AGENTS.md`
+  makes delegation the default policy and the `/orchestrate` skill carries
+  the full contract.
+- **opencode**: `default_agent: orchestrator` replaces `build` — the
+  delegation contract lives in the orchestrator's own system prompt, with
+  the `orchestration` skill as loadable detail. Subagents launch via the
+  Task tool or `@name` mentions.
 
 ### Report contract
 
@@ -109,76 +103,64 @@ Every subagent ends with a fixed block:
 REPORT
 status: ok | blocked | failed
 summary: <max 3 lines>
-artifact: <path under .devin/reports/ or none>
+artifact: <path under .devin/reports/ or .opencode/reports/, or none>
 files: <key files>
 next: <next step or none>
 ```
 
-The orchestrator consumes only that — the subagent's transcript never enters
-its context. Long outputs are written to `<repo>/.devin/reports/<slug>.md`
-and referenced by path.
+The orchestrator consumes only that — the subagent's transcript never
+enters its context.
 
 ### Memory (optional, on demand)
 
 For work spanning sessions, the agent maintains
-`<repo>/.devin/memory/state.md` (≤50 lines). The `SessionStart` hook script
-injects it automatically on the next session. Nothing is created for
-single-session work.
+`.devin/memory/state.md` / `.opencode/memory/state.md` (≤50 lines). On the
+next session it is injected automatically — by a `SessionStart` hook on
+devin, by the `agentic-memory` plugin (`experimental.chat.system.transform`)
+on opencode.
 
-### Hooks = hard policy
+### Policy enforcement
 
-Hooks live in `hooks/*.py` (not inline in config) and are wired globally in
-`config.json → hooks`. They fire in **every permission mode**, including
-`dangerous` (verified). Each script reads the event JSON on stdin and emits
-`{"decision":"block"}` on stdout to deny.
-
-| Script | Event | Behavior |
+| Harness | Mechanism | Blocks |
 |---|---|---|
-| `pre_tool_guard.py` | `PreToolUse` (all tools) | `exec`: blocks `rm -rf`, `Remove-Item -Recurse`, `del /s /q`, `format`, `dd`, `git push -f`, `reset --hard`, `clean -f`. `read/write/edit`: blocks `.env*`, `id_rsa*`, `*.pem`, `*.key`, `credentials.toml` |
-| `session_start_memory.py` | `SessionStart` | Injects `.devin/memory/state.md` as `additionalContext` if present |
+| devin | `hooks/pre_tool_guard.py` via `config.json → hooks` (fires even in `dangerous` mode) | `rm -rf`, `Remove-Item -Recurse`, `del /s /q`, `format`, `dd`, `git push -f`, `reset --hard`, `clean -f`; reads/writes of `.env*`, `id_rsa*`, `*.pem`, `*.key`, `credentials.toml` |
+| opencode | `plugins/agentic-guard.js` via `tool.execute.before` (fires even under `--auto`) + `permission` deny rules | same destructive commands and secret paths; deny = `throw` before execution |
 
-### Permissions & bypass mode
+### Permissions & auto-approve
 
-`config.managed.json` ships `Read/Write/Edit/Exec(**)` in `allow` — required
-so **background subagents don't auto-deny every tool** (background agents
-can't prompt). The safety net is the guard script + `deny` on secret reads +
-`ask` on `.env` writes.
+- **devin**: `config.managed.json` ships broad `allow` (background subagents
+  can't prompt); the guard script + `deny`/`ask` rules are the real net.
+  `--set-bypass` sets `DEVIN_PERMISSION_MODE=dangerous`.
+- **opencode**: `permission` ships `allow` for normal ops, `deny` on secret
+  reads and destructive bash patterns, `ask` on `.env` edits and external
+  dirs. Approval-free runs: `opencode --auto` — the guard plugin still
+  enforces policy.
 
-I run `DEVIN_PERMISSION_MODE=dangerous` as a user env var (set it with
-`install.py --set-bypass`), so hooks are the real enforcement layer.
-Per-session override: `devin --permission-mode auto`.
-
-## Customizing (for future me)
+## Customizing
 
 | Want | Where |
 |---|---|
-| New subagent profile | `devin-home/agents/<name>.md` — YAML frontmatter (`name`, `description`, `model`, `allowed-tools`, `max-nesting`) + body = system prompt. End it with the REPORT block. |
-| Change a model | `model:` in the profile. Check `devin models` for slugs. Note: `subagent_general` inherits the parent's model (expensive); custom profiles don't. |
-| Tune the guard | Edit the regexes in `devin-home/hooks/pre_tool_guard.py` — no config change needed. |
-| New lifecycle hook | Write `devin-home/hooks/<name>.py`, add an entry under `"hooks"` in `devin-home/config.managed.json`, re-run `install.py`. Events: `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`, `SessionStart`, `SessionEnd`. |
-| Debug hooks | `/hooks` inside a session lists loaded hooks. `devin doctor` validates agent profiles. |
+| New subagent | `harnesses/<name>/payload/agents/<name>.md` — frontmatter + system prompt ending with the REPORT block |
+| Tune the guard | `harnesses/devin/payload/hooks/pre_tool_guard.py` (regexes) or `harnesses/opencode/payload/plugins/agentic-guard.js` — no config change needed |
+| New lifecycle hook | devin: python script + `config.managed.json → hooks`. opencode: plugin module in `plugins/` returning hook handlers |
+| Change managed config keys | `harnesses/<name>/payload/config.managed.json` — merged keys are listed in `HARNESSES[<name>]['managed_keys']` in `install.py` |
 
 ## Developing / testing without touching your real env
 
 ```powershell
-python install.py --dry-run                            # dry-run: prints plan only
-python install.py --devin-home ./sandbox/devin         # full install into a sandbox
-$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin doctor # real validation vs sandbox
-$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin -p "use the scout subagent ..."
+python install.py --dry-run
+python install.py --harness devin    --devin-home    ./sandbox/devin
+python install.py --harness opencode --opencode-home ./sandbox/oc
+$env:DEVIN_DATA_DIR="$PWD\sandbox\devin"; devin doctor
+$env:OPENCODE_CONFIG_DIR="$PWD\sandbox\oc"; opencode debug config
 ```
-
-`DEVIN_DATA_DIR` redirects Devin CLI's whole data dir — skills, agents, hooks,
-sessions — so everything works for real against the sandbox while your real
-`%APPDATA%\devin` stays untouched. `--check` and the stamp honor `--devin-home` too (`python install.py --devin-home ./sandbox/devin --check`).
-
-On Linux/macOS the layout is `~/.config/devin/` and the same python installer + hooks work - test bash/WSL variants the same way with `--devin-home ./sandbox/devin`.
 
 ## Notes
 
-- Everything runs on python3 (`python` on Windows). No pwsh dependency anywhere.
-- NEVER commit `credentials.toml`, `.env*`, or your `org_id` — the
-  `.gitignore` and `config.managed.json` (a fragment, not a full copy of
-  your real config) exist precisely for that.
-- Reference: [Devin CLI extensibility docs](https://docs.devin.ai/cli/extensibility),
-  [subagents](https://docs.devin.ai/cli/subagents),
-  [hooks](https://docs.devin.ai/cli/extensibility/hooks/overview).
+- Everything runs on python3 (`python` on Windows); opencode plugins are
+  dependency-free ESM. No pwsh dependency anywhere.
+- NEVER commit `credentials.toml`, `.env*`, or your `org_id`.
+- References: [Devin CLI extensibility](https://docs.devin.ai/cli/extensibility) ·
+  [opencode agents](https://opencode.ai/docs/agents) ·
+  [opencode plugins](https://opencode.ai/docs/plugins) ·
+  [opencode permissions](https://opencode.ai/docs/permissions).

@@ -1,0 +1,40 @@
+{
+  "$schema-note": "install.py merges these keys into ~/.config/opencode/opencode.json — your providers, mcp and model prefs survive; never commit secrets",
+  "default_agent": "orchestrator",
+  "subagent_depth": 1,
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "**/.env*": "deny",
+      "**/id_rsa*": "deny",
+      "**/*.pem": "deny",
+      "**/*.key": "deny",
+      "**/credentials.toml": "deny"
+    },
+    "edit": {
+      "*": "allow",
+      "**/.env*": "ask",
+      "**/credentials.toml": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "rm -rf *": "deny",
+      "rm -fr *": "deny",
+      "git push --force*": "deny",
+      "git push -f *": "deny",
+      "git reset --hard*": "deny",
+      "git clean -f*": "deny",
+      "dd if=*": "deny",
+      "Remove-Item * -Recurse*": "deny",
+      "del /s /q*": "deny",
+      "format ?:*": "deny"
+    },
+    "external_directory": "ask",
+    "doom_loop": "ask",
+    "task": "allow",
+    "skill": "allow"
+  }
+}

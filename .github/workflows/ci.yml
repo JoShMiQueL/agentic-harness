@@ -22,40 +22,57 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Compile python sources
-        run: python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in ['install.py', 'uninstall.py'] + glob.glob('devin-home/hooks/*.py')]"
+        run: python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in ['install.py', 'uninstall.py'] + glob.glob('harnesses/devin/payload/hooks/*.py')]"
 
-      - name: Validate managed config JSON
-        run: python -c "import json; d=json.load(open('devin-home/config.managed.json')); assert 'permissions' in d and 'hooks' in d"
+      - name: Validate managed config JSONs
+        run: python -c "import json; d=json.load(open('harnesses/devin/payload/config.managed.json')); assert 'permissions' in d and 'hooks' in d; o=json.load(open('harnesses/opencode/payload/config.managed.json')); assert 'permission' in o and 'default_agent' in o"
 
-      - name: Validate agent profiles frontmatter
+      - name: Validate agent profile frontmatter
         shell: bash
         run: |
           python - <<'EOF'
-          import glob, re, sys
-          for f in glob.glob('devin-home/agents/*.md'):
+          import glob, re
+          for f in glob.glob('harnesses/devin/payload/agents/*.md'):
               t = open(f, encoding='utf-8').read()
               assert t.startswith('---'), f'{f}: missing frontmatter'
               fm = t.split('---')[1]
               for k in ('name', 'description', 'model'):
                   assert re.search(rf'^{k}:', fm, re.M), f'{f}: missing {k}'
+          for f in glob.glob('harnesses/opencode/payload/agents/*.md'):
+              t = open(f, encoding='utf-8').read()
+              assert t.startswith('---'), f'{f}: missing frontmatter'
+              fm = t.split('---')[1]
+              for k in ('description', 'mode'):
+                  assert re.search(rf'^{k}:', fm, re.M), f'{f}: missing {k}'
           print('profiles ok')
           EOF
 
-      - name: Install into sandbox
-        run: python install.py --devin-home "${{ runner.temp }}/devin-sb"
+      - name: Install devin into sandbox
+        run: python install.py --harness devin --devin-home "${{ runner.temp }}/devin-sb"
 
-      - name: Sync check
-        run: python install.py --devin-home "${{ runner.temp }}/devin-sb" --check
+      - name: Install opencode into sandbox
+        run: python install.py --harness opencode --opencode-home "${{ runner.temp }}/oc-sb"
+
+      - name: Sync check (both)
+        run: |
+          python install.py --harness devin --devin-home "${{ runner.temp }}/devin-sb" --check
+          python install.py --harness opencode --opencode-home "${{ runner.temp }}/oc-sb" --check
+        shell: bash
 
       - name: Re-install is a no-op
         run: |
-          out=$(python install.py --devin-home "${{ runner.temp }}/devin-sb")
-          echo "$out" | grep -q "Already in sync" || { echo "$out"; exit 1; }
+          out=$(python install.py --harness devin --devin-home "${{ runner.temp }}/devin-sb")
+          echo "$out" | grep -q "already in sync" || { echo "$out"; exit 1; }
+          out=$(python install.py --harness opencode --opencode-home "${{ runner.temp }}/oc-sb")
+          echo "$out" | grep -q "already in sync" || { echo "$out"; exit 1; }
         shell: bash
 
       - name: Uninstall leaves it clean
         run: |
-          python uninstall.py --devin-home "${{ runner.temp }}/devin-sb"
+          python uninstall.py --harness devin --devin-home "${{ runner.temp }}/devin-sb"
+          python uninstall.py --harness opencode --opencode-home "${{ runner.temp }}/oc-sb"
           test ! -f "${{ runner.temp }}/devin-sb/agentic.json"
           test ! -f "${{ runner.temp }}/devin-sb/AGENTS.md"
+          test ! -f "${{ runner.temp }}/oc-sb/agentic.json"
+          test ! -f "${{ runner.temp }}/oc-sb/AGENTS.md"
         shell: bash
