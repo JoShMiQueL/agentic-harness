@@ -43,7 +43,8 @@ def main():
     try:
         try:
             r = subprocess.run(
-                [exe, '-p', PROBE, '--permission-mode', 'auto'],
+                [exe, '-p', PROBE, '--permission-mode', 'auto',
+             '--respect-workspace-trust', 'false'],
                 capture_output=True, text=True, env=env, cwd=ROOT,
                 timeout=180, stdin=subprocess.DEVNULL)
             out = r.stdout + r.stderr
