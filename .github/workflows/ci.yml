@@ -70,6 +70,9 @@ jobs:
           echo "$out" | grep -q "already in sync" || { echo "$out"; exit 1; }
         shell: bash
 
+      - name: Local e2e test suite (sandboxed)
+        run: python tests/test_e2e.py
+
       - name: Uninstall leaves it clean
         run: |
           python uninstall.py --harness devin --devin-home "${{ runner.temp }}/devin-sb"

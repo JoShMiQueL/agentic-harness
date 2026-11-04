@@ -53,6 +53,8 @@ VERSION                      # bumped on every shipped change
   stdlib only. Opencode plugins must be dependency-free ESM.
 - NEVER commit `credentials.toml`, `.env*`, or `org_id`.
 - After changing a payload, verify against a sandbox, never the real home:
+  `python tests/test_e2e.py` runs the full install/check/uninstall suite in
+  a temp sandbox (10 tests, both harnesses). Manual:
   `python install.py --harness devin --devin-home ./sandbox/devin`
   `python install.py --harness opencode --opencode-home ./sandbox/oc`
   `DEVIN_DATA_DIR=$PWD/sandbox/devin devin doctor` validates devin side;
