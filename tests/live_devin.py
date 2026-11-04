@@ -20,6 +20,10 @@ DEVIN_CREDS_ENV = 'DEVIN_CREDENTIALS_TOML'
 PROBE = 'Reply with exactly this line and nothing else: REPORT / status: ok / summary: probe / artifact: none / files: none / next: none'
 
 
+def _dec(b):
+    return (b or b'').decode('utf-8', 'replace') if isinstance(b, bytes) else str(b or '')
+
+
 def sandbox_home():
     sb = Path(tempfile.mkdtemp(prefix='agentic-live-devin-'))
     subprocess.run([PY, str(ROOT / 'install.py'), '--harness', 'devin',
@@ -40,19 +44,22 @@ def main():
     sb = sandbox_home()
     exe = shutil.which('devin') or shutil.which('devin.exe') or 'devin'
     env = dict(os.environ, DEVIN_DATA_DIR=str(sb))
+    rc = '?'
     try:
         try:
+            # bytes capture: devin emits unicode that breaks cp1252 on CI
             r = subprocess.run(
                 [exe, '-p', PROBE, '--permission-mode', 'auto',
-             '--respect-workspace-trust', 'false'],
-                capture_output=True, text=True, env=env, cwd=ROOT,
+                 '--respect-workspace-trust', 'false'],
+                capture_output=True, env=env, cwd=ROOT,
                 timeout=180, stdin=subprocess.DEVNULL)
-            out = r.stdout + r.stderr
+            out = _dec(r.stdout) + _dec(r.stderr)
+            rc = r.returncode
         except subprocess.TimeoutExpired as e:
-            out = (e.stdout or '') + (e.stderr or '') + '\n[TIMEOUT]'
+            out = _dec(e.stdout) + _dec(e.stderr) + '\n[TIMEOUT]'
+            rc = 'timeout'
         ok = 'status: ok' in out and 'REPORT' in out
         print(out if os.environ.get('VERBOSE') else out[-800:])
-        rc = getattr(r, 'returncode', '?')
         print(f'\n{"PASS" if ok else "FAIL"} live devin probe '
               f'(exit={rc}, sandbox={sb})')
         sys.exit(0 if ok else 1)
