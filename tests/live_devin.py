@@ -47,6 +47,11 @@ def main():
     rc = '?'
     try:
         print(f'[dbg] exe={exe} sb={sb} creds={ (sb / "credentials.toml").is_file() }')
+        if os.environ.get('CI'):  # pre-flight: does the CLI see auth at all?
+            a = subprocess.run([exe, 'auth', 'status'],
+                               capture_output=True, env=env, timeout=30,
+                               stdin=subprocess.DEVNULL)
+            print('[dbg] auth:', _dec(a.stdout) + _dec(a.stderr))
         try:
             # bytes capture: devin emits unicode that breaks cp1252 on CI
             r = subprocess.run(
