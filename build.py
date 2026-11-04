@@ -137,10 +137,11 @@ BUILD = {
     'devin': {
         'AGENTS.md': ('global-rules.md', 'shared'),
         'skills/orchestrate/SKILL.md': ('orchestrate.md', 'overlay'),
-        'agents/scout.md': devin_agent('scout', 'swe-2-medium', READ_TOOLS),
-        'agents/tester.md': devin_agent('tester', 'swe-2-medium', READ_TOOLS[:3] + ['exec', 'write']),
-        'agents/reviewer.md': devin_agent('reviewer', 'swe-2-high', READ_TOOLS[:3] + ['exec', 'write']),
-        'agents/worker.md': devin_agent('worker', 'swe-2-max'),
+        # model slugs come from vars so they can match whatever proxy is live
+        'agents/scout.md': lambda h, v: devin_agent('scout', v['MODEL_SCOUT'], READ_TOOLS)(h, v),
+        'agents/tester.md': lambda h, v: devin_agent('tester', v['MODEL_TESTER'], READ_TOOLS[:3] + ['exec', 'write'])(h, v),
+        'agents/reviewer.md': lambda h, v: devin_agent('reviewer', v['MODEL_REVIEWER'], READ_TOOLS[:3] + ['exec', 'write'])(h, v),
+        'agents/worker.md': lambda h, v: devin_agent('worker', v['MODEL_WORKER'])(h, v),
     },
     'opencode': {
         'AGENTS.md': ('global-rules.md', 'shared'),

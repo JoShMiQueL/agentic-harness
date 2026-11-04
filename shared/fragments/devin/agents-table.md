@@ -1,7 +1,7 @@
 | Profile | For | Model | Writes |
 |---|---|---|---|
-| `scout` | Codebase exploration, architecture, research | swe-2-medium | no |
-| `tester` | Running tests/lint/build and reporting | swe-2-medium | `{{REPORTS_DIR}}/` only |
-| `reviewer` | Diff reviews by severity | swe-2-high | `{{REPORTS_DIR}}/` only |
-| `worker` | Scoped implementation subtasks | swe-2-max | yes |
+| `scout` | Codebase exploration, architecture, research | {{MODEL_SCOUT}} | no |
+| `tester` | Running tests/lint/build and reporting | {{MODEL_TESTER}} | `{{REPORTS_DIR}}/` only |
+| `reviewer` | Diff reviews by severity | {{MODEL_REVIEWER}} | `{{REPORTS_DIR}}/` only |
+| `worker` | Scoped implementation subtasks | {{MODEL_WORKER}} | yes |
 | `subagent_explore` / `subagent_general` | built-in fallback | router / parent | — |
