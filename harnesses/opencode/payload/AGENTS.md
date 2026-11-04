@@ -21,5 +21,5 @@
 ## Memory
 
 - Before ending a task whose state must survive the session, update
-  `.opencode/memory/state.md` (≤50 lines: state, decisions, pending) — a
+  `.opencode/memory/state.md` (≤50 lines: state, decisions, pending) —
   the agentic-memory plugin injects it next session.

@@ -13,5 +13,5 @@
 ## Memory
 
 - Before ending a task whose state must survive the session, update
-  `{{MEMORY_STATE}}` (≤50 lines: state, decisions, pending) — a
+  `{{MEMORY_STATE}}` (≤50 lines: state, decisions, pending) —
   {{MEMORY_SHORT}}.

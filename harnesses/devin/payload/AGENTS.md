@@ -22,5 +22,5 @@
 ## Memory
 
 - Before ending a task whose state must survive the session, update
-  `.devin/memory/state.md` (≤50 lines: state, decisions, pending) — a
-  SessionStart hook injects it next session.
+  `.devin/memory/state.md` (≤50 lines: state, decisions, pending) —
+  a SessionStart hook injects it next session.
