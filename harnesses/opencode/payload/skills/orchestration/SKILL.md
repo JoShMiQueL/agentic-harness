@@ -25,7 +25,34 @@ Launch them with the Task tool (`subagent_type`) or mention `@name`.
 - Broad or uncertain investigation → `scout`.
 - Implementation with a clear scope → `worker`.
 - Post-change verification → `tester`. Pre-merge → `reviewer`.
-- Do NOT delegate: reading 1–3 files, a single command, or what you already know.
+- Do NOT delegate: reading 1–3 files, a single command, or what you already
+  know. Subagent launches cost a full prompt round-trip (goal + scope + file
+  contents + acceptance criteria re-stated) — on tiny edits that costs more
+  than the edit itself.
+
+## Edits: when to keep them, when to delegate
+
+Keep it yourself when ALL of these hold:
+
+- The change touches ≤3 files or a few dozen lines.
+- You already have the relevant code in context.
+- Correctness is verifiable at a glance or with one quick command.
+- The edit is part of an ongoing reasoning chain (you decided it a second
+  ago) — delegating would force a subagent to rebuild that reasoning.
+
+Delegate when ANY of these hold:
+
+- The subtask is self-contained with a clear scope (a feature, a fix, a
+  refactor) — it deserves its own context and a clean REPORT.
+- Doing it inline would fill your context with tool output, iterations and
+  dead ends you don't need afterwards.
+- Several disjoint chunks can run in parallel.
+- The work needs a different tool posture (read-only research, verification)
+  than your current one.
+
+Rule of thumb: a subagent pays off when the delegated work is larger than
+the prompt you'd have to write to specify it. For a one-line fix that is
+almost never true — write the line yourself.
 - Parallelize subagents with disjoint work; never two writing the same files.
 
 ## How to delegate (self-contained prompt)
