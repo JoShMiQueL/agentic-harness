@@ -1,40 +1,67 @@
 {
-  "$schema-note": "install.py merges these keys into ~/.config/opencode/opencode.json — your providers, mcp and model prefs survive; never commit secrets",
+  "$schema-note": "install.py merges these keys into ~/.config/opencode/opencode.json — your providers, mcp and model prefs survive; never commit secrets. V2 format: permissions is an ordered array (last match wins); agent rules under agents.<id>.permissions append after global ones.",
   "default_agent": "orchestrator",
-  "subagent_depth": 1,
-  "permission": {
-    "read": {
-      "*": "allow",
-      "*.env": "deny",
-      "*.env.*": "deny",
-      "*.env.example": "allow",
-      "**/.env*": "deny",
-      "**/id_rsa*": "deny",
-      "**/*.pem": "deny",
-      "**/*.key": "deny",
-      "**/credentials.toml": "deny"
+  "experimental": {
+    "subagent_depth": 1
+  },
+  "permissions": [
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": "*.env", "effect": "deny" },
+    { "action": "read", "resource": "*.env.*", "effect": "deny" },
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
+    { "action": "read", "resource": "**/.env", "effect": "deny" },
+    { "action": "read", "resource": "**/.env.*", "effect": "deny" },
+    { "action": "read", "resource": "**/.env.example", "effect": "allow" },
+    { "action": "read", "resource": "**/id_rsa*", "effect": "deny" },
+    { "action": "read", "resource": "**/*.pem", "effect": "deny" },
+    { "action": "read", "resource": "**/*.key", "effect": "deny" },
+    { "action": "read", "resource": "**/credentials.toml", "effect": "deny" },
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": "**/.env", "effect": "ask" },
+    { "action": "edit", "resource": "**/.env.*", "effect": "ask" },
+    { "action": "edit", "resource": "**/.env.example", "effect": "allow" },
+    { "action": "edit", "resource": "**/credentials.toml", "effect": "deny" },
+    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "deny" },
+    { "action": "shell", "resource": "rm -fr *", "effect": "deny" },
+    { "action": "shell", "resource": "git push --force*", "effect": "deny" },
+    { "action": "shell", "resource": "git push -f *", "effect": "deny" },
+    { "action": "shell", "resource": "git reset --hard*", "effect": "deny" },
+    { "action": "shell", "resource": "git clean -f*", "effect": "deny" },
+    { "action": "shell", "resource": "dd if=*", "effect": "deny" },
+    { "action": "shell", "resource": "Remove-Item * -Recurse*", "effect": "deny" },
+    { "action": "shell", "resource": "del /s /q*", "effect": "deny" },
+    { "action": "shell", "resource": "format ?:*", "effect": "deny" },
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+    { "action": "subagent", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "*", "effect": "allow" }
+  ],
+  "agents": {
+    "orchestrator": {
+      "permissions": [
+        { "action": "subagent", "resource": "*", "effect": "allow" }
+      ]
     },
-    "edit": {
-      "*": "allow",
-      "**/.env*": "ask",
-      "**/credentials.toml": "deny"
+    "scout": {
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "question", "resource": "*", "effect": "deny" }
+      ]
     },
-    "bash": {
-      "*": "allow",
-      "rm -rf *": "deny",
-      "rm -fr *": "deny",
-      "git push --force*": "deny",
-      "git push -f *": "deny",
-      "git reset --hard*": "deny",
-      "git clean -f*": "deny",
-      "dd if=*": "deny",
-      "Remove-Item * -Recurse*": "deny",
-      "del /s /q*": "deny",
-      "format ?:*": "deny"
+    "tester": {
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": ".opencode/reports/*", "effect": "allow" }
+      ]
     },
-    "external_directory": "ask",
-    "doom_loop": "ask",
-    "task": "allow",
-    "skill": "allow"
+    "reviewer": {
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "edit", "resource": ".opencode/reports/*", "effect": "allow" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "git *", "effect": "allow" }
+      ]
+    }
   }
 }

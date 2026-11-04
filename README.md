@@ -131,25 +131,26 @@ enters its context.
 For work spanning sessions, the agent maintains
 `.devin/memory/state.md` / `.opencode/memory/state.md` (≤50 lines). On the
 next session it is injected automatically — by a `SessionStart` hook on
-devin, by the `agentic-memory` plugin (`experimental.chat.system.transform`)
-on opencode.
+devin, by the `agentic-memory` plugin (`session.hook("context")` pushes a
+system part) on opencode.
 
 ### Policy enforcement
 
 | Harness | Mechanism | Blocks |
 |---|---|---|
 | devin | `hooks/pre_tool_guard.py` via `config.json → hooks` (fires even in `dangerous` mode) | `rm -rf`, `Remove-Item -Recurse`, `del /s /q`, `format`, `dd`, `git push -f`, `reset --hard`, `clean -f`; reads/writes of `.env*`, `id_rsa*`, `*.pem`, `*.key`, `credentials.toml` |
-| opencode | `plugins/agentic-guard.js` via `tool.execute.before` (fires even under `--auto`) + `permission` deny rules | same destructive commands and secret paths; deny = `throw` before execution |
+| opencode | `plugins/agentic-guard.js` via `permission.hook("evaluate")` (fires even under `--auto`) + `permissions` deny rules | same destructive commands and secret paths; deny = `event.effect = "deny"` |
 
 ### Permissions & auto-approve
 
 - **devin**: `config.managed.json` ships broad `allow` (background subagents
   can't prompt); the guard script + `deny`/`ask` rules are the real net.
   `--set-bypass` sets `DEVIN_PERMISSION_MODE=dangerous`.
-- **opencode**: `permission` ships `allow` for normal ops, `deny` on secret
-  reads and destructive bash patterns, `ask` on `.env` edits and external
-  dirs. Approval-free runs: `opencode --auto` — the guard plugin still
-  enforces policy.
+- **opencode**: V2 `permissions` array ships `allow` for normal ops, `deny`
+  on secret reads and destructive shell patterns, `ask` on `.env` edits and
+  external dirs; per-agent rules under `agents.<id>.permissions`.
+  Approval-free runs: `opencode --auto` — the guard plugin still enforces
+  policy.
 
 ## Customizing
 

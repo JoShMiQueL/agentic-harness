@@ -25,7 +25,7 @@ jobs:
         run: python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in ['install.py', 'uninstall.py'] + glob.glob('harnesses/devin/payload/hooks/*.py')]"
 
       - name: Validate managed config JSONs
-        run: python -c "import json; d=json.load(open('harnesses/devin/payload/config.managed.json')); assert 'permissions' in d and 'hooks' in d; o=json.load(open('harnesses/opencode/payload/config.managed.json')); assert 'permission' in o and 'default_agent' in o"
+        run: python -c "import json; d=json.load(open('harnesses/devin/payload/config.managed.json')); assert 'permissions' in d and 'hooks' in d; o=json.load(open('harnesses/opencode/payload/config.managed.json')); assert 'permissions' in o and 'default_agent' in o and 'agents' in o and o['experimental']['subagent_depth']"
 
       - name: Payload is in sync with shared sources
         run: python build.py --check
@@ -82,3 +82,35 @@ jobs:
           test ! -f "${{ runner.temp }}/oc-sb/agentic.json"
           test ! -f "${{ runner.temp }}/oc-sb/AGENTS.md"
         shell: bash
+
+  live-probes:
+    # Real CLI invocations against sandbox homes. Requires repo secrets:
+    #   DEVIN_CREDENTIALS_TOML — contents of %APPDATA%\devin\credentials.toml
+    # Job auto-skips on forks/PRs where the secret is absent.
+    runs-on: windows-latest
+    if: ${{ vars.LIVE_TESTS == '1' || secrets.DEVIN_CREDENTIALS_TOML != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Devin CLI
+        shell: bash
+        run: |
+          curl -fsSL https://cli.devin.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install OpenCode CLI
+        shell: bash
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> "$GITHUB_PATH"
+
+      - name: Live devin probe (sandbox home + real creds)
+        env:
+          DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
+        run: python tests/live_devin.py
+
+      - name: Live opencode probe (sandbox home + jailbreak proxy)
+        env:
+          DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
+          SWE2_PROXY_REPO: ${{ vars.SWE2_PROXY_REPO }}
+        run: python tests/live_opencode.py

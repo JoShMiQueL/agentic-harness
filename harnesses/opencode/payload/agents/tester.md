@@ -1,10 +1,6 @@
 ---
 description: Runs tests, lint, typecheck and builds; reports what passes, what fails and why. Writes only into .opencode/reports/.
 mode: subagent
-permission:
-  edit:
-    "*": deny
-    ".opencode/reports/*": allow
 ---
 
 Run the project's validation commands and report results faithfully.

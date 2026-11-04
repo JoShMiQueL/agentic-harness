@@ -79,7 +79,12 @@ def t_opencode_fresh_install():
     home, r = fresh_install('opencode')
     cfg = json.loads((home / 'opencode.json').read_text())
     assert cfg['default_agent'] == 'orchestrator'
-    assert 'permission' in cfg
+    assert cfg['experimental']['subagent_depth'] == 1
+    assert isinstance(cfg['permissions'], list), 'permissions must be a V2 rules array'
+    assert {'action': 'shell', 'resource': 'rm -rf *', 'effect': 'deny'} in cfg['permissions']
+    assert 'permission' not in cfg, 'legacy v1 permission key leaked'
+    assert 'subagent_depth' not in cfg, 'legacy top-level subagent_depth leaked'
+    assert cfg['agents']['scout']['permissions'], 'agent-level permissions missing'
     for agent in ('orchestrator', 'scout', 'tester', 'reviewer', 'worker'):
         assert (home / 'agents' / f'{agent}.md').is_file(), agent
 
@@ -125,7 +130,8 @@ def t_uninstall_clean():
     uninstall('opencode', home)
     assert not (home / 'agentic.json').exists()
     cfg = json.loads((home / 'opencode.json').read_text())
-    for k in ('default_agent', 'permission', 'subagent_depth'):
+    for k in ('default_agent', 'permission', 'permissions', 'subagent_depth',
+              'experimental', 'agents'):
         assert k not in cfg, k
 
 
@@ -141,10 +147,22 @@ def t_agent_content_contract():
     for agent in ('scout', 'tester', 'reviewer', 'worker'):
         body = (home / 'agents' / f'{agent}.md').read_text(encoding='utf-8')
         assert 'REPORT' in body and 'status: ok' in body, agent
-        assert 'mode: subagent' in body.split('---')[1], agent
+        fm = body.split('---')[1]
+        assert 'mode: subagent' in fm, agent
+        assert 'permission:' not in fm, f'{agent}: legacy permission frontmatter'
     orch = (home / 'agents' / 'orchestrator.md').read_text(encoding='utf-8')
     assert 'mode: primary' in orch.split('---')[1]
+    assert 'permission:' not in orch.split('---')[1], 'legacy task permission'
     assert '{{' not in orch, 'unrendered placeholder left in orchestrator'
+
+
+def t_plugin_v2_format():
+    for plugin in ('agentic-guard', 'agentic-memory'):
+        src = (ROOT / 'harnesses/opencode/payload/plugins'
+               / f'{plugin}.js').read_text(encoding='utf-8')
+        assert 'export default' in src, f'{plugin}: v2 needs a default export'
+        assert 'id:' in src, f'{plugin}: default export needs an id'
+        assert 'export const' not in src, f'{plugin}: v1 named export left'
 
 
 def t_auto_selects_installed():

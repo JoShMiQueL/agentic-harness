@@ -1,7 +1,7 @@
 // agentic-guard — hard policy, fires in every permission mode (incl. --auto).
 // Blocks destructive shell commands and access to secret files.
-// Deny mechanism: throw before execution -> the tool never runs and the
-// model sees the reason in the tool error.
+// Deny mechanism: set event.effect = "deny" in the permission.evaluate hook —
+// a deny is enforced even under --auto and the model sees the reason.
 
 const DESTRUCTIVE = new RegExp(
   [
@@ -18,28 +18,27 @@ const DESTRUCTIVE = new RegExp(
 )
 
 const SECRETS = /\.env|id_rsa|\.pem$|\.key$|credentials\.toml$/i
-const FILE_TOOLS = new Set(["read", "write", "edit", "patch", "multiedit"])
-const SHELL_TOOLS = new Set(["bash", "shell", "exec", "execute"])
+const FILE_ACTIONS = new Set(["read", "edit", "write", "patch"])
 
-function file_path(args) {
-  return args.filePath ?? args.file_path ?? args.path ?? ""
-}
-
-export const AgenticGuard = async () => ({
-  "tool.execute.before": async (input, output) => {
-    const args = output.args ?? {}
-    if (SHELL_TOOLS.has(input.tool)) {
-      const command = String(args.command ?? args.commands ?? "")
-      if (DESTRUCTIVE.test(command)) {
-        throw new Error(
-          "Blocked by global policy (agentic-guard): destructive command. " +
-            "Ask the user to run it manually.",
-        )
+export default {
+  id: "agentic-guard",
+  setup: async (ctx) => {
+    await ctx.permission.hook("evaluate", (event) => {
+      if (event.action === "shell") {
+        const command = event.resources.join(" ")
+        if (DESTRUCTIVE.test(command)) {
+          event.effect = "deny"
+          event.message =
+            "Blocked by global policy (agentic-guard): destructive command. " +
+            "Ask the user to run it manually."
+        }
+      } else if (FILE_ACTIONS.has(event.action)) {
+        if (event.resources.some((r) => SECRETS.test(r))) {
+          event.effect = "deny"
+          event.message =
+            "Blocked by global policy (agentic-guard): secret file access."
+        }
       }
-    } else if (FILE_TOOLS.has(input.tool) && SECRETS.test(file_path(args))) {
-      throw new Error(
-        "Blocked by global policy (agentic-guard): secret file access.",
-      )
-    }
+    })
   },
-})
+}

@@ -1,13 +1,6 @@
 ---
 description: Reviews diffs and code (correctness, security, style, performance). Read-only plus git diffs. Returns findings by severity.
 mode: subagent
-permission:
-  edit:
-    "*": deny
-    ".opencode/reports/*": allow
-  bash:
-    "*": deny
-    "git *": allow
 ---
 
 Review the working diff (`git diff` / `git diff --staged`) or the files you

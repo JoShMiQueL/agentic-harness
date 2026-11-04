@@ -70,26 +70,20 @@ def agent_body(name, harness, v):
     return render(src.read_text(encoding='utf-8'), harness, v)
 
 
-def fm_opencode(name, description, mode, permission=None, temperature=None):
+def fm_opencode(name, description, mode, temperature=None):
+    # permissions are NOT generated here: file frontmatter keeps v1 syntax
+    # (`permission` + `task`/`bash`), which opencode v2 marks legacy. The real
+    # rules live in config.managed.json as V2 `permissions`/`agents` arrays.
     lines = ['---', f'description: {description}', f'mode: {mode}']
     if temperature is not None:
         lines.append(f'temperature: {temperature}')
-    if permission:
-        lines.append('permission:')
-        for tool, rule in permission.items():
-            if isinstance(rule, dict):
-                lines.append(f'  {tool}:')
-                for pat, act in rule.items():
-                    lines.append(f'    "{pat}": {act}' if pat != '*' else f'    "*": {act}')
-            else:
-                lines.append(f'  {tool}: {rule}')
     lines.append('---')
     return '\n'.join(lines) + '\n\n'
 
 
-def oc_agent(name, description, permission=None):
+def oc_agent(name, description):
     def gen(harness, v):
-        return fm_opencode(name, description, 'subagent', permission) + agent_body(name, harness, v)
+        return fm_opencode(name, description, 'subagent') + agent_body(name, harness, v)
     return gen
 
 
@@ -97,8 +91,7 @@ def oc_orchestrator(harness, v):
     head = fm_opencode('orchestrator',
                        'Orchestrator - delegates scoped work to specialized subagents, '
                        'consumes only REPORT blocks, keeps its own context small.',
-                       mode='primary', temperature=0.2,
-                       permission={'task': 'allow'})
+                       mode='primary', temperature=0.2)
     v2 = dict(v, REPORT_FENCE='', REPORT_FENCE_END='', REPORT_INDENT='')
     intro = (render(SHARED.joinpath('contract.md').read_text(encoding='utf-8'), harness, v2)
              .replace('Act as the orchestrator.', 'You are the orchestrator.', 1)
@@ -153,15 +146,11 @@ BUILD = {
             + skill_doc(h, v, 'Lightweight orchestration')),
         'agents/orchestrator.md': oc_orchestrator,
         'agents/scout.md': oc_agent('scout',
-            'Read-only exploration and research. Use for understanding architecture, tracing dependencies, or answering questions without touching anything.',
-            {'edit': 'deny', 'bash': 'deny', 'write': 'deny', 'todowrite': 'deny'}),
+            'Read-only exploration and research. Use for understanding architecture, tracing dependencies, or answering questions without touching anything.'),
         'agents/tester.md': oc_agent('tester',
-            'Runs tests, lint, typecheck and builds; reports what passes, what fails and why. Writes only into .opencode/reports/.',
-            {'edit': {'*': 'deny', '.opencode/reports/*': 'allow'}}),
+            'Runs tests, lint, typecheck and builds; reports what passes, what fails and why. Writes only into .opencode/reports/.'),
         'agents/reviewer.md': oc_agent('reviewer',
-            'Reviews diffs and code (correctness, security, style, performance). Read-only plus git diffs. Returns findings by severity.',
-            {'edit': {'*': 'deny', '.opencode/reports/*': 'allow'},
-             'bash': {'*': 'deny', 'git *': 'allow'}}),
+            'Reviews diffs and code (correctness, security, style, performance). Read-only plus git diffs. Returns findings by severity.'),
         'agents/worker.md': oc_agent('worker',
             'Autonomous implementation of scoped subtasks (features, fixes, refactors). Full tool access. Use when the orchestrator delegates code changes.'),
     },

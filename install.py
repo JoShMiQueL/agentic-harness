@@ -30,7 +30,9 @@ HARNESSES = {
     'opencode': {
         'exe': ['opencode', 'opencode.exe', 'opencode.cmd'],
         'config_file': 'opencode.json',
-        'managed_keys': ['default_agent', 'subagent_depth', 'permission'],
+        'managed_keys': ['default_agent', 'experimental', 'permissions', 'agents'],
+        # legacy keys an older agentic-harness wrote; prune so v2 doesn't warn
+        'prune_keys': ['subagent_depth', 'permission'],
         'doctor': None,  # `opencode debug config` is heavier; skipped
     },
 }
@@ -159,6 +161,18 @@ def install_one(harness, home, root, files, version, args):
     if stamp.get('version') == version and not orphans and all(
             (home / rel).is_file() and sha256(home / rel) == sha256(src)
             for rel, src in manifest.items()):
+        # files unchanged, but the config may still carry prunable legacy keys
+        spec = HARNESSES[harness]
+        prune = spec.get('prune_keys', ())
+        cfg_path = home / spec['config_file']
+        if prune and cfg_path.is_file():
+            cfg = json.loads(cfg_path.read_text(encoding='utf-8-sig'))
+            if any(k in cfg for k in prune):
+                shutil.copy2(cfg_path, str(cfg_path) + '.bak')
+                for k in prune:
+                    if cfg.pop(k, None) is not None:
+                        print(f'==> [{harness}] pruned legacy config key "{k}"')
+                cfg_path.write_text(json.dumps(cfg, indent=2) + '\n')
         print(f'==> [{harness}] already in sync (v{version})')
         return
 
@@ -189,8 +203,13 @@ def install_one(harness, home, root, files, version, args):
         for k in spec['managed_keys']:
             if k in managed:
                 cfg[k] = managed[k]
+        for k in spec.get('prune_keys', ()):  # superseded/legacy keys we wrote before
+            if cfg.pop(k, None) is not None:
+                print(f'  - {spec["config_file"]}: pruned legacy "{k}"')
         cfg_path.write_text(json.dumps(cfg, indent=2) + '\n')
-        print(f'  + {spec["config_file"]}: {", ".join(k for k in spec["managed_keys"] if k in managed)} merged')
+        merged_keys = ', '.join(k for k in spec['managed_keys'] if k in managed)
+        if merged_keys:
+            print(f'  + {spec["config_file"]}: {merged_keys} merged')
 
     files_hash = {rel: sha256(home / rel) for rel in manifest}
     stamp_path.write_text(json.dumps({

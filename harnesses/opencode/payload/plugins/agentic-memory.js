@@ -6,22 +6,26 @@
 import { existsSync, readFileSync } from "fs"
 import { join } from "path"
 
-export const AgenticMemory = async ({ directory }) => {
-  let state = null
-  const sessions = new Set()
-  try {
-    const p = join(directory, ".opencode", "memory", "state.md")
-    if (existsSync(p)) state = readFileSync(p, "utf8").trim()
-  } catch {
-    /* unreadable -> skip silently */
-  }
-  if (!state) return {}
+export default {
+  id: "agentic-memory",
+  setup: async (ctx) => {
+    let state = null
+    const sessions = new Set()
+    try {
+      const p = join(ctx.location.directory, ".opencode", "memory", "state.md")
+      if (existsSync(p)) state = readFileSync(p, "utf8").trim()
+    } catch {
+      /* unreadable -> skip silently */
+    }
+    if (!state) return
 
-  return {
-    "experimental.chat.system.transform": async (input, output) => {
-      if (!input.sessionID || sessions.has(input.sessionID)) return
-      sessions.add(input.sessionID)
-      output.system.push("Persisted project memory:\n" + state)
-    },
-  }
+    await ctx.session.hook("context", (event) => {
+      if (!event.sessionID || sessions.has(event.sessionID)) return
+      sessions.add(event.sessionID)
+      event.system.push({
+        type: "text",
+        text: "Persisted project memory:\n" + state,
+      })
+    })
+  },
 }

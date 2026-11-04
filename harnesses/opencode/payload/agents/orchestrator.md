@@ -2,8 +2,6 @@
 description: Orchestrator - delegates scoped work to specialized subagents, consumes only REPORT blocks, keeps its own context small.
 mode: primary
 temperature: 0.2
-permission:
-  task: allow
 ---
 
 You are the orchestrator. Your context is scarce: delegate whatever does not

@@ -35,10 +35,13 @@ VERSION                      # bumped on every shipped change
 - devin: hooks are python scripts wired in `config.json → hooks`
   (placeholders `{{PY}}`, `{{DEVIN_HOME}}`). Primary agent can't be
   replaced -> delegation contract lives in the `orchestrate` skill.
-- opencode: hooks are ESM plugins in `plugins/` (`tool.execute.before`,
-  `experimental.chat.system.transform`); deny = `throw`. Primary agent IS
-  replaceable -> `agents/orchestrator.md` + `default_agent` in managed
-  config. Permissions use per-tool glob maps, last match wins.
+- opencode: hooks are ESM plugins in `plugins/` — v2 modules export a
+  default `{id, setup(ctx)}`; guard denies via
+  `ctx.permission.hook("evaluate")` + `event.effect="deny"`, memory injects
+  via `ctx.session.hook("context")` + `event.system.push(...)`. Primary
+  agent IS replaceable -> `agents/orchestrator.md` + `default_agent` in
+  managed config. Permissions are V2 `permissions`/`agents` arrays
+  (last match wins) — never put v1 `permission` keys in agent frontmatter.
 
 ## Rules for working on this repo
 

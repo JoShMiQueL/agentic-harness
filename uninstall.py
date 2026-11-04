@@ -17,7 +17,7 @@ HARNESSES = {
     },
     'opencode': {
         'config_file': 'opencode.json',
-        'managed_keys': ['default_agent', 'subagent_depth', 'permission'],
+        'managed_keys': ['default_agent', 'experimental', 'permissions', 'agents'],
     },
 }
 
