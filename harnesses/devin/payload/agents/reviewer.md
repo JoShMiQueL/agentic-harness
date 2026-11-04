@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: "Reviews diffs and code (correctness, security, style, performance). Read-only plus git diffs. Returns findings by severity."
-model: swe-2-high
+model: swe-2
 allowed-tools:
   - read
   - grep

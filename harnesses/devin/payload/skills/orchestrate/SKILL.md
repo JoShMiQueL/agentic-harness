@@ -15,10 +15,10 @@ need your direct judgment and consume only condensed reports.
 
 | Profile | For | Model | Writes |
 |---|---|---|---|
-| `scout` | Codebase exploration, architecture, research | swe-2-medium | no |
-| `tester` | Running tests/lint/build and reporting | swe-2-medium | `.devin/reports/` only |
-| `reviewer` | Diff reviews by severity | swe-2-high | `.devin/reports/` only |
-| `worker` | Scoped implementation subtasks | swe-2-max | yes |
+| `scout` | Codebase exploration, architecture, research | swe-2 | no |
+| `tester` | Running tests/lint/build and reporting | swe-2 | `.devin/reports/` only |
+| `reviewer` | Diff reviews by severity | swe-2 | `.devin/reports/` only |
+| `worker` | Scoped implementation subtasks | swe-2 | yes |
 | `subagent_explore` / `subagent_general` | built-in fallback | router / parent | — |
 
 Launch them with the subagent tool, foreground or background. Background
