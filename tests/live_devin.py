@@ -37,6 +37,7 @@ def sandbox_home():
             Path.home() / '.config' / 'devin' / 'credentials.toml'
         default.parent.mkdir(parents=True, exist_ok=True)
         default.write_text(creds.rstrip('\n') + '\n')
+        print(f'[dbg] creds bytes written: {default.stat().st_size}')
     else:      # local: real creds already at the default path — nothing to do
         pass
     return sb
