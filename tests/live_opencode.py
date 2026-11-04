@@ -38,7 +38,7 @@ def start_proxy(workdir):
                if token else f'https://github.com/{repo}')
         subprocess.run(['git', 'clone', '--depth', '1', url, pdir],
                        check=True, capture_output=True)
-    # the package is literally src/ at repo root — pyproject must sit in pdir
+    # flat layout: devin_proxy/ package at repo root — pyproject must sit in pdir
     if not (Path(pdir) / 'pyproject.toml').is_file():
         cand = list(Path(pdir).rglob('pyproject.toml'))
         if cand:
@@ -52,7 +52,7 @@ def start_proxy(workdir):
         cf = Path(workdir) / 'credentials.toml'
         cf.write_text(creds)
         env['DEVIN_PROXY_CRED'] = str(cf)
-    proc = subprocess.Popen([PY, '-m', 'src'], cwd=pdir, env=env,
+    proc = subprocess.Popen([PY, '-m', 'devin_proxy'], cwd=pdir, env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             text=True)
     for _ in range(60):
