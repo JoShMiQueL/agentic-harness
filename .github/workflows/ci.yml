@@ -86,7 +86,7 @@ jobs:
   live-probes:
     # Real CLI invocations against sandbox homes. Requires repo secret:
     #   DEVIN_CREDENTIALS_TOML — contents of %APPDATA%\devin\credentials.toml
-    #   var SWE2_PROXY_REPO    — owner/repo of the swe2 proxy (defaults in test)
+    #   var DEVIN_PROXY_REPO    — owner/repo of the devin-proxy (defaults in test)
     # Job auto-skips on forks/PRs where the secret is absent.
     runs-on: windows-latest
     if: vars.LIVE_TESTS == '1' || vars.DEVIN_CREDENTIALS_TOML_SET == '1'
@@ -122,8 +122,8 @@ jobs:
           DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
         run: python tests/live_devin.py
 
-      - name: Live opencode probe (sandbox home + jailbreak proxy)
+      - name: Live opencode probe (sandbox home + devin-proxy)
         env:
           DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
-          SWE2_PROXY_REPO: ${{ vars.SWE2_PROXY_REPO }}
+          DEVIN_PROXY_REPO: ${{ vars.DEVIN_PROXY_REPO }}
         run: python tests/live_opencode.py

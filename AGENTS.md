@@ -65,8 +65,8 @@ VERSION                      # bumped on every shipped change
   `--dry-run` prints the plan without writing. `sandbox/` is gitignored.
 - Live probes (real CLIs, sandbox homes): `python tests/live_devin.py` and
   `tests/live_opencode.py`. Locally they reuse your real devin creds + the
-  swe2 proxy at 127.0.0.1:8889; in CI they materialize
-  `secrets.DEVIN_CREDENTIALS_TOML` and clone `vars.SWE2_PROXY_REPO`.
+  devin-proxy at 127.0.0.1:8390; in CI they materialize
+  `secrets.DEVIN_CREDENTIALS_TOML` and clone `vars.DEVIN_PROXY_REPO`.
 - Entry points: PowerShell one-liner via raw.githubusercontent.com (jsDelivr
   can serve .ps1 as octet-stream, which breaks `irm|iex`); cmd/bash via
   jsDelivr `@main`. install.py downloads commit-pinned files via the API
