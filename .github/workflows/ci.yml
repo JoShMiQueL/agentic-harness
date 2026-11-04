@@ -84,25 +84,25 @@ jobs:
         shell: bash
 
   live-probes:
-    # Real CLI invocations against sandbox homes. Requires repo secrets:
+    # Real CLI invocations against sandbox homes. Requires repo secret:
     #   DEVIN_CREDENTIALS_TOML — contents of %APPDATA%\devin\credentials.toml
+    #   var SWE2_PROXY_REPO    — owner/repo of the swe2 proxy (defaults in test)
     # Job auto-skips on forks/PRs where the secret is absent.
     runs-on: windows-latest
-    if: ${{ vars.LIVE_TESTS == '1' || secrets.DEVIN_CREDENTIALS_TOML != '' }}
+    if: vars.LIVE_TESTS == '1' || vars.DEVIN_CREDENTIALS_TOML_SET == '1'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Devin CLI
-        shell: bash
         run: |
-          curl -fsSL https://cli.devin.ai/install.sh | bash
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          $ProgressPreference='SilentlyContinue'
+          irm https://cli.devin.ai/install.ps1 | iex
+          echo "$env:LOCALAPPDATA\devin\cli\bin" >> $env:GITHUB_PATH
 
       - name: Install OpenCode CLI
-        shell: bash
         run: |
-          curl -fsSL https://opencode.ai/install | bash
-          echo "$HOME/.opencode/bin" >> "$GITHUB_PATH"
+          npm install -g @opencode/cli
+          opencode --version
 
       - name: Live devin probe (sandbox home + real creds)
         env:
