@@ -32,8 +32,11 @@ def start_proxy(workdir):
     pdir = os.environ.get('DEVIN_PROXY_DIR')
     if not pdir:
         pdir = str(Path(workdir) / 'proxy')
-        subprocess.run(['git', 'clone', '--depth', '1',
-                        f'https://github.com/{repo}', pdir],
+        # private repo: needs a token to clone in CI
+        token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
+        url = (f'https://x-access-token:{token}@github.com/{repo}'
+               if token else f'https://github.com/{repo}')
+        subprocess.run(['git', 'clone', '--depth', '1', url, pdir],
                        check=True, capture_output=True)
         # repo root contains devin-proxy/ as a subdirectory
         cand = Path(pdir) / 'devin-proxy'
