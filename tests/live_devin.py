@@ -29,14 +29,16 @@ def sandbox_home():
     subprocess.run([PY, str(ROOT / 'install.py'), '--harness', 'devin',
                     '--devin-home', str(sb)], check=True, capture_output=True)
     creds = os.environ.get(DEVIN_CREDS_ENV)
-    if creds:  # CI: materialize from secret (secrets lose trailing newlines)
-        (sb / 'credentials.toml').write_text(creds.rstrip('\n') + '\n')
-    else:      # local: reuse real creds (they're per-account, not per-dir)
-        real = Path(os.environ.get('APPDATA', '')) / 'devin' / 'credentials.toml'
-        if not real.is_file():
-            real = Path.home() / '.config' / 'devin' / 'credentials.toml'
-        if real.is_file():
-            shutil.copy2(real, sb / 'credentials.toml')
+    if creds:
+        # CI: materialize secret. DEVIN_DATA_DIR only redirects *data*;
+        # credentials always live at the platform default, so write there.
+        default = Path(os.environ.get('APPDATA', '')) / 'devin' / 'credentials.toml' \
+            if sys.platform == 'win32' else \
+            Path.home() / '.config' / 'devin' / 'credentials.toml'
+        default.parent.mkdir(parents=True, exist_ok=True)
+        default.write_text(creds.rstrip('\n') + '\n')
+    else:      # local: real creds already at the default path — nothing to do
+        pass
     return sb
 
 

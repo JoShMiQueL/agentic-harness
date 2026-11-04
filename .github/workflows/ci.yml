@@ -121,10 +121,7 @@ jobs:
         env:
           DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
           VERBOSE: '1'
-        run: |
-          Write-Host "== auth status before probe =="
-          $env:DEVIN_DATA_DIR = "$env:TEMP\dbg-auth-sb"
-          python tests/live_devin.py
+        run: python tests/live_devin.py
 
       - name: Live opencode probe (sandbox home + jailbreak proxy)
         env:
