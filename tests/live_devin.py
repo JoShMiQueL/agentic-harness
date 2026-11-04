@@ -46,6 +46,7 @@ def main():
     env = dict(os.environ, DEVIN_DATA_DIR=str(sb))
     rc = '?'
     try:
+        print(f'[dbg] exe={exe} sb={sb} creds={ (sb / "credentials.toml").is_file() }')
         try:
             # bytes capture: devin emits unicode that breaks cp1252 on CI
             r = subprocess.run(
