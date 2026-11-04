@@ -126,5 +126,4 @@ jobs:
         env:
           DEVIN_CREDENTIALS_TOML: ${{ secrets.DEVIN_CREDENTIALS_TOML }}
           DEVIN_PROXY_REPO: ${{ vars.DEVIN_PROXY_REPO }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: python tests/live_opencode.py
