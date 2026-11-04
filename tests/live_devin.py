@@ -37,7 +37,6 @@ def sandbox_home():
             Path.home() / '.config' / 'devin' / 'credentials.toml'
         default.parent.mkdir(parents=True, exist_ok=True)
         default.write_text(creds.rstrip('\n') + '\n')
-        print(f'[dbg] creds bytes written: {default.stat().st_size}')
     else:      # local: real creds already at the default path — nothing to do
         pass
     return sb
@@ -49,12 +48,6 @@ def main():
     env = dict(os.environ, DEVIN_DATA_DIR=str(sb))
     rc = '?'
     try:
-        print(f'[dbg] exe={exe} sb={sb} creds={ (sb / "credentials.toml").is_file() }')
-        if os.environ.get('CI'):  # pre-flight: does the CLI see auth at all?
-            a = subprocess.run([exe, 'auth', 'status'],
-                               capture_output=True, env=env, timeout=30,
-                               stdin=subprocess.DEVNULL)
-            print('[dbg] auth:', _dec(a.stdout) + _dec(a.stderr))
         try:
             # bytes capture: devin emits unicode that breaks cp1252 on CI
             r = subprocess.run(

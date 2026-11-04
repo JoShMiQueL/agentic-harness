@@ -57,12 +57,16 @@ VERSION                      # bumped on every shipped change
 - NEVER commit `credentials.toml`, `.env*`, or `org_id`.
 - After changing a payload, verify against a sandbox, never the real home:
   `python tests/test_e2e.py` runs the full install/check/uninstall suite in
-  a temp sandbox (10 tests, both harnesses). Manual:
+  a temp sandbox (11 tests, both harnesses). Manual:
   `python install.py --harness devin --devin-home ./sandbox/devin`
   `python install.py --harness opencode --opencode-home ./sandbox/oc`
   `DEVIN_DATA_DIR=$PWD/sandbox/devin devin doctor` validates devin side;
   `OPENCODE_CONFIG_DIR=$PWD/sandbox/oc opencode debug config` for opencode.
   `--dry-run` prints the plan without writing. `sandbox/` is gitignored.
+- Live probes (real CLIs, sandbox homes): `python tests/live_devin.py` and
+  `tests/live_opencode.py`. Locally they reuse your real devin creds + the
+  swe2 proxy at 127.0.0.1:8889; in CI they materialize
+  `secrets.DEVIN_CREDENTIALS_TOML` and clone `vars.SWE2_PROXY_REPO`.
 - Entry points: PowerShell one-liner via raw.githubusercontent.com (jsDelivr
   can serve .ps1 as octet-stream, which breaks `irm|iex`); cmd/bash via
   jsDelivr `@main`. install.py downloads commit-pinned files via the API
