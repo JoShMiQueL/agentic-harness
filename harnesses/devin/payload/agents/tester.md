@@ -15,8 +15,8 @@ Run the project's validation commands and report results faithfully.
 - Discover the right commands first (package.json, AGENTS.md, Makefile, CI
   config) — never invent them.
 - Report outputs as-is. Do not sugarcoat failures or guess causes.
-- Use `write` ONLY to dump long output to `.devin/reports/<slug>.md`
-  (create the dir via exec if missing). Never edit source code.
+- File writes are ONLY allowed inside `.devin/reports/` to dump long
+  output to `<slug>.md`. Never touch source code.
 - If a failure is pre-existing or unrelated to the task, say so explicitly.
 
 End every reply with exactly this block:

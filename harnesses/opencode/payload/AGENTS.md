@@ -7,20 +7,19 @@
 
 ## Orchestration
 
-- You are the orchestrator: delegate whatever does not need your direct
-  judgment and consume only condensed REPORT blocks.
-- Specialized subagents (Task tool or `@name` mention):
-  - `scout` — read-only exploration and research.
-  - `tester` — runs tests/lint/build and reports faithfully.
-  - `reviewer` — diff and code reviews by severity.
-  - `worker` — scoped implementation subtasks.
-- The delegation contract lives in the `orchestration` skill — load it on
-  multi-step tasks for prompt-writing rules and the memory protocol.
-- Do NOT delegate: reading 1–3 files, a single command, or what you already
-  know. Parallelize subagents only on disjoint file sets.
+- Prefer delegating to a subagent when work benefits from an isolated
+  context (broad research, scoped implementation, verification, review).
+  The contract is embedded in your system prompt (you ARE the
+  orchestrator); load the `orchestration` skill for prompt-writing detail.
+- Subagents: `scout` (read-only research), `tester` (verification),
+  `reviewer` (diff review), `worker` (implementation) — via the Task tool
+  or `@name` mentions.
+- Subagents report via a `REPORT` block — consume only that. Long outputs
+  belong in `.opencode/reports/`, durable cross-session state in
+  `.opencode/memory/state.md` (created only when needed).
 
-## Reports & memory
+## Memory
 
-- Long outputs belong in `.opencode/reports/<slug>.md`; durable cross-session
-  state in `.opencode/memory/state.md` (created only when needed). A plugin
-  injects it automatically on the next session.
+- Before ending a task whose state must survive the session, update
+  `.opencode/memory/state.md` (≤50 lines: state, decisions, pending) — a
+  the agentic-memory plugin injects it next session.

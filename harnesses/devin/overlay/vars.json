@@ -1,0 +1,12 @@
+{
+  "REPORTS_DIR": ".devin/reports",
+  "MEMORY_STATE": ".devin/memory/state.md",
+  "MEMORY_MECHANISM": "A SessionStart hook injects it automatically next session. Do not create\n  memory for single-session work.",
+  "LAUNCH_NOTE": "\n\n",
+  "REPORT_INDENT": "",
+  "MEMORY_SHORT": "SessionStart hook injects it next session",
+  "SCOUT_NOTE": " (background if more work exists)",
+  "AGENT_WORD": "profiles",
+  "REPORT_FENCE": "```\n",
+  "REPORT_FENCE_END": "```\n"
+}

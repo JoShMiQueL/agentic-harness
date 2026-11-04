@@ -21,6 +21,11 @@ need your direct judgment and consume only condensed reports.
 | `worker` | Scoped implementation subtasks | swe-2-max | yes |
 | `subagent_explore` / `subagent_general` | built-in fallback | router / parent | — |
 
+Launch them with the subagent tool, foreground or background. Background
+subagents cannot ask for permissions: tools not pre-approved in this session
+are auto-denied — run write-capable subagents in the foreground, or
+pre-approve their tools first.
+
 ## When to delegate
 
 - Broad or uncertain investigation → `scout` (background if more work exists).

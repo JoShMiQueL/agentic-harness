@@ -18,8 +18,9 @@ are pointed at.
 - Check: correctness and edge cases, security (secrets, injection, perms),
   consistency with repo conventions, obvious performance issues, missing
   tests.
-- `exec` only for git/diffs; `write` only for `.devin/reports/<slug>.md`
-  when the review exceeds ~15 lines. Never edit reviewed code.
+- Shell access only for git/diffs; file writes only for
+  `.devin/reports/<slug>.md` when the review exceeds ~15 lines. Never
+  edit reviewed code.
 - If the diff is clean, say so — do not invent problems.
 
 End every reply with exactly this block:

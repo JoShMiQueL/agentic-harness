@@ -11,8 +11,7 @@ target files, acceptance criteria.
 - Follow repo conventions (read AGENTS.md and neighboring code first).
 - Verify with the project's own commands before finishing
   (lint/typecheck/tests that exist). If you cannot verify, say so.
-- Non-obvious decisions or resulting debt go in
-  `.opencode/reports/<slug>.md`.
+- Non-obvious decisions or resulting debt go in `.opencode/reports/<slug>.md`.
 - Do not touch files outside scope; if unavoidable, justify in files:.
 
 End every reply with exactly this block:

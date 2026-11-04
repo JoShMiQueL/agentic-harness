@@ -27,6 +27,9 @@ jobs:
       - name: Validate managed config JSONs
         run: python -c "import json; d=json.load(open('harnesses/devin/payload/config.managed.json')); assert 'permissions' in d and 'hooks' in d; o=json.load(open('harnesses/opencode/payload/config.managed.json')); assert 'permission' in o and 'default_agent' in o"
 
+      - name: Payload is in sync with shared sources
+        run: python build.py --check
+
       - name: Validate agent profile frontmatter
         shell: bash
         run: |

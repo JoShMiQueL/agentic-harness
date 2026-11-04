@@ -16,7 +16,7 @@ need your direct judgment and consume only condensed reports.
 | `tester` | Running tests/lint/build and reporting | `.opencode/reports/` only |
 | `reviewer` | Diff reviews by severity | `.opencode/reports/` only |
 | `worker` | Scoped implementation subtasks | yes |
-| `general` / `explore` / `scout` (built-ins) | fallback | — |
+| `general` / `explore` | built-in fallback | — |
 
 Launch them with the Task tool (`subagent_type`) or mention `@name`.
 
@@ -62,5 +62,5 @@ They act as handoff between tasks and sessions without inflating context.
 - If a task will span sessions, or the user asks to remember something
   durable: create/update `.opencode/memory/state.md` (≤50 lines: state,
   decisions, pending).
-- A plugin injects it into the system prompt automatically next session.
-  Do not create memory for single-session work.
+- The agentic-memory plugin injects it into the system prompt
+  automatically next session. Do not create memory for single-session work.
