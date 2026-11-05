@@ -85,6 +85,40 @@ credentials and model prefs survive. Re-run it after every `git pull`.
 **Uninstall:** `python uninstall.py` (auto: only harnesses with an install
 stamp; or `--harness <name>`).
 
+### Optional — fast CLI tools (recommended)
+
+Subagents prefer the harness's **native tools** (`glob`/`grep`/`read`) —
+they're in-process and fastest. When they do drop to a shell (builds, tests,
+git, one-off pipelines), having the modern Rust/Go tools on `PATH` makes
+those calls noticeably quicker and the output tighter. They're **optional**
+— the harness falls back to the classic Unix commands — but recommended.
+
+```bash
+# one-liner (winget, Windows):
+winget install BurntSushi.ripgrep.MSVC sharkdp.fd sharkdp.bat eza-community.eza chmln.sd junegunn.fzf jqlang.jq mikefarah.yq dandavison.delta bootandy.dust ajeetdsouza.zoxide ast-grep.ast-grep Casey.Just XAMPPRocky.Tokei sharkdp.hyperfine -e --accept-source-agreements --accept-package-agreements
+```
+
+| Task | Fast tool | Replaces |
+|---|---|---|
+| Search file contents | `rg` | `grep -r` |
+| Find files | `fd` | `find` |
+| Structural code search/rewrite | `ast-grep` (`sg`) | text `grep` on code |
+| Read files | `bat` | `cat` |
+| List dirs | `eza` | `ls`/`tree` |
+| Find & replace | `sd` | `sed` |
+| JSON / YAML | `jq` / `yq` | manual parsing |
+| Disk usage | `dust` | `du` |
+| Git diffs (pager) | `delta` | `diff` |
+| Count code | `tokei` | `wc`/`cloc` |
+| Benchmarks | `hyperfine` | `time` |
+| Smart `cd` / fuzzy pick | `zoxide` / `fzf` | — |
+| Task runner | `just` | `make` |
+
+> **Windows note:** the agent shell resolves to **Git Bash** (MSYS2) — see the
+> `shell` key in `opencode.json`. These tools run natively there. The harness
+> never calls PowerShell; multi-line/quote-heavy commands are written to a
+> `*.sh` file and executed, since the Windows launcher mangles single quotes.
+
 ## Updates & sync check
 
 Each harness install writes a stamp at `<home>/agentic.json` (version +
