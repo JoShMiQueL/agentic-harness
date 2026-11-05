@@ -1,8 +1,8 @@
-﻿{
-  "MODEL_ORCHESTRATOR": "devin-proxy/swe-2",
-  "MODEL_SCOUT": "devin-proxy/swe-2-flash",
+{
+  "MODEL_ORCHESTRATOR": "devin-proxy/swe-2-high",
+  "MODEL_SCOUT": "devin-proxy/swe-2-flash-high",
   "MODEL_TESTER": "devin-proxy/swe-2-flash-medium",
-  "MODEL_REVIEWER": "devin-proxy/swe-2",
+  "MODEL_REVIEWER": "devin-proxy/swe-2-high",
   "MODEL_WORKER": "devin-proxy/swe-2-flash-high",
   "REPORTS_DIR": ".opencode/reports",
   "MEMORY_STATE": ".opencode/memory/state.md",

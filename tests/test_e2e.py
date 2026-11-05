@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """agentic-harness local smoke tests â€” installs/uninstalls into a sandbox
 under ./sandbox/ and never touches real harness homes.
 
@@ -161,10 +161,10 @@ def t_agent_content_contract():
 def t_opencode_agent_models():
     home, _ = fresh_install('opencode')
     want = {
-        'orchestrator': 'devin-proxy/swe-2',
-        'scout': 'devin-proxy/swe-2-flash',
+        'orchestrator': 'devin-proxy/swe-2-high',
+        'scout': 'devin-proxy/swe-2-flash-high',
         'tester': 'devin-proxy/swe-2-flash-medium',
-        'reviewer': 'devin-proxy/swe-2',
+        'reviewer': 'devin-proxy/swe-2-high',
         'worker': 'devin-proxy/swe-2-flash-high',
     }
     for agent, model in want.items():

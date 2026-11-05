@@ -17,7 +17,7 @@ need your direct judgment and consume only condensed reports.
 |---|---|---|---|
 | `scout` | Codebase exploration, architecture, research | swe-2-flash-high | no |
 | `tester` | Running tests/lint/build and reporting | swe-2-flash-medium | `.devin/reports/` only |
-| `reviewer` | Diff reviews by severity | swe-2 | `.devin/reports/` only |
+| `reviewer` | Diff reviews by severity | swe-2-high | `.devin/reports/` only |
 | `worker` | Scoped implementation subtasks | swe-2-flash-high | yes |
 
 Model ids resolve through the devin-proxy wire: `swe-2*` lanes are free on

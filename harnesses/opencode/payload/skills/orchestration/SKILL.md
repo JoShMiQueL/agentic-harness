@@ -12,9 +12,9 @@ need your direct judgment and consume only condensed reports.
 
 ﻿| Agent | For | Model | Writes |
 |---|---|---|---|
-| `scout` | Codebase exploration, architecture, research | devin-proxy/swe-2-flash | no |
+| `scout` | Codebase exploration, architecture, research | devin-proxy/swe-2-flash-high | no |
 | `tester` | Running tests/lint/build and reporting | devin-proxy/swe-2-flash-medium | `.opencode/reports/` only |
-| `reviewer` | Diff reviews by severity | devin-proxy/swe-2 | `.opencode/reports/` only |
+| `reviewer` | Diff reviews by severity | devin-proxy/swe-2-high | `.opencode/reports/` only |
 | `worker` | Scoped implementation subtasks | devin-proxy/swe-2-flash-high | yes |
 | `general` / `explore` | built-in fallback | global model | â€” |
 

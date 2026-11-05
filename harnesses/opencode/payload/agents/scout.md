@@ -1,7 +1,7 @@
 ---
 description: Read-only exploration and research. Use for understanding architecture, tracing dependencies, or answering questions without touching anything.
 mode: subagent
-model: devin-proxy/swe-2-flash
+model: devin-proxy/swe-2-flash-high
 ---
 
 ﻿You have no write or exec tools. Your job is to investigate and report.

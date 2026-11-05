@@ -1,4 +1,4 @@
-﻿{
+{
   "REPORTS_DIR": ".devin/reports",
   "MEMORY_STATE": ".devin/memory/state.md",
   "MEMORY_MECHANISM": "A SessionStart hook injects it automatically next session. Do not create\n  memory for single-session work.",
@@ -6,7 +6,7 @@
   "REPORT_INDENT": "",
   "MODEL_SCOUT": "swe-2-flash-high",
   "MODEL_TESTER": "swe-2-flash-medium",
-  "MODEL_REVIEWER": "swe-2",
+  "MODEL_REVIEWER": "swe-2-high",
   "MODEL_WORKER": "swe-2-flash-high",
   "MEMORY_SHORT": "a SessionStart hook injects it next session",
   "SCOUT_NOTE": " (background if more work exists)",

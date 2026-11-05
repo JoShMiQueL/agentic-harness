@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Live end-to-end test of the opencode harness â€” `opencode run` against a
 sandbox OPENCODE_CONFIG_DIR with the devin-proxy in front.
 
@@ -76,6 +76,9 @@ def sandbox_home():
             'options': {'baseURL': PROXY_URL + '/v1', 'apiKey': 'anything'},
             'models': {
                 'swe-2': {'name': 'SWE-2 (Devin)'},
+                'swe-2-medium': {'name': 'SWE-2 Medium (Devin)'},
+                'swe-2-high': {'name': 'SWE-2 High (Devin)'},
+                'swe-2-max': {'name': 'SWE-2 Max (Devin)'},
                 'swe-2-flash': {'name': 'SWE-2 Flash (Devin)'},
                 'swe-2-flash-medium': {'name': 'SWE-2 Flash Medium (Devin)'},
                 'swe-2-flash-high': {'name': 'SWE-2 Flash High (Devin)'},
@@ -83,8 +86,8 @@ def sandbox_home():
             },
         }
     }
-    cfg['model'] = 'devin-proxy/swe-2'
-    cfg['small_model'] = 'devin-proxy/swe-2'
+    cfg['model'] = 'devin-proxy/swe-2-high'
+    cfg['small_model'] = 'devin-proxy/swe-2-high'
     cfg_path.write_text(json.dumps(cfg, indent=2) + '\n')
     return sb
 
