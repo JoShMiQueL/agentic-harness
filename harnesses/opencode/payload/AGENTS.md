@@ -14,11 +14,11 @@
 
   The contract is embedded in your system prompt (you ARE the
   orchestrator); load the `orchestration` skill for prompt-writing detail.
-- Delegate by default: anything touching >3 files or needing a tool
-  chain goes to a subagent. `edit`/`shell` are policy-denied for you —
-  execution always flows through subagents; your own read/grep/glob are
-  for targeted lookups only, never exploratory sweeps (`scout` owns
-  those).
+- You are the router: analyze each request, pick the right agent from
+  the routing table in your system prompt, delegate. `edit`/`shell`/
+  `execute`/`webfetch`/`websearch` are policy-denied — all execution
+  flows through subagents; `read`/`glob`/`grep` are for targeted
+  routing lookups only, never exploratory sweeps (`scout` owns those).
 - Subagents: `scout` (read-only research), `tester` (verification),
   `reviewer` (diff review), `worker` (implementation) — via the Task tool
   or `@name` mentions.
