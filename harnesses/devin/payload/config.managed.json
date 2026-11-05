@@ -28,17 +28,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{PY}} \"{{DEVIN_HOME}}/hooks/session_start_memory.py\"",
-            "timeout": 5
-          }
-        ]
-      }
     ]
   }
 }

@@ -117,8 +117,10 @@ without inflating context.
 
 ## Memory (only when necessary)
 
-- If a task will span sessions, or the user asks to remember something
-  durable: create/update `.opencode/memory/state.md` (≤50 lines: state,
-  decisions, pending).
-- The agentic-memory plugin injects it into the system prompt
-  automatically next session. Do not create memory for single-session work.
+- Project facts worth persisting across sessions — gotchas, non-obvious
+  invariants, decisions, pending work — go into `AGENTS.md` at
+  the project root (≤50 lines: state, decisions, pending). Create it
+  only when there is durable state to keep; single-session work leaves
+  no memory.
+- opencode loads `AGENTS.md` from the project root into context
+  automatically every session. Do not create memory for single-session work.

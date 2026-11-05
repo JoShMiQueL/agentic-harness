@@ -70,7 +70,9 @@ without inflating context.
 
 ## Memory (only when necessary)
 
-- If a task will span sessions, or the user asks to remember something
-  durable: create/update `{{MEMORY_STATE}}` (≤50 lines: state,
-  decisions, pending).
+- Project facts worth persisting across sessions — gotchas, non-obvious
+  invariants, decisions, pending work — go into `{{MEMORY_STATE}}` at
+  the project root (≤50 lines: state, decisions, pending). Create it
+  only when there is durable state to keep; single-session work leaves
+  no memory.
 - {{MEMORY_MECHANISM}}

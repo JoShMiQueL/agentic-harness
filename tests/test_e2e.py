@@ -188,7 +188,7 @@ def t_devin_agent_models():
 
 
 def t_plugin_v2_format():
-    for plugin in ('agentic-guard', 'agentic-memory'):
+    for plugin in ('agentic-guard',):
         src = (ROOT / 'harnesses/opencode/payload/plugins'
                / f'{plugin}.js').read_text(encoding='utf-8')
         assert 'export default' in src, f'{plugin}: v2 needs a default export'

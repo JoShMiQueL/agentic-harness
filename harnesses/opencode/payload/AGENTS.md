@@ -24,12 +24,12 @@
   or `@name` mentions.
 - Subagents report via a `REPORT` block — consume only that. Long outputs
   belong in `.opencode/reports/`, durable cross-session state in
-  `.opencode/memory/state.md` (created only when needed).
+  `AGENTS.md` (created only when needed).
 
 ## Memory
 
 - Before ending a task whose state must survive the session, update
 
-  `.opencode/memory/state.md` (≤50 lines: state, decisions, pending) —
+  `AGENTS.md` (≤50 lines: state, decisions, pending) —
 
-  the agentic-memory plugin injects it next session.
+  opencode injects `AGENTS.md` every session.

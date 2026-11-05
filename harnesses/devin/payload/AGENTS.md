@@ -20,7 +20,7 @@
   `reviewer` (diff review), `worker` (implementation).
 - Subagents report via a `REPORT` block — consume only that. Long outputs
   belong in `.devin/reports/`, durable cross-session state in
-  `.devin/memory/state.md` (created only when needed).
+  `AGENTS.md` (created only when needed).
 - Background subagents cannot ask for permissions: tools not pre-approved
   in this session are auto-denied. Run write-capable subagents in the
   foreground, or pre-approve their tools first.
@@ -29,6 +29,6 @@
 
 - Before ending a task whose state must survive the session, update
 
-  `.devin/memory/state.md` (≤50 lines: state, decisions, pending) —
+  `AGENTS.md` (≤50 lines: state, decisions, pending) —
 
-  a SessionStart hook injects it next session.
+  Devin injects `AGENTS.md` every session.
