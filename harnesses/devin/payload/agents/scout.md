@@ -1,7 +1,7 @@
 ---
 name: scout
 description: Read-only exploration and research. Use for understanding architecture, tracing dependencies, or answering questions without touching anything.
-model: swe-2
+model: swe-2-flash-high
 allowed-tools:
   - read
   - grep

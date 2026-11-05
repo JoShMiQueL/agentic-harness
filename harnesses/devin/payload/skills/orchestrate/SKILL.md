@@ -15,10 +15,15 @@ need your direct judgment and consume only condensed reports.
 
 | Profile | For | Model | Writes |
 |---|---|---|---|
-| `scout` | Codebase exploration, architecture, research | swe-2 | no |
-| `tester` | Running tests/lint/build and reporting | swe-2 | `.devin/reports/` only |
+| `scout` | Codebase exploration, architecture, research | swe-2-flash-high | no |
+| `tester` | Running tests/lint/build and reporting | swe-2-flash-medium | `.devin/reports/` only |
 | `reviewer` | Diff reviews by severity | swe-2 | `.devin/reports/` only |
-| `worker` | Scoped implementation subtasks | swe-2 | yes |
+| `worker` | Scoped implementation subtasks | swe-2-flash-high | yes |
+
+Model ids resolve through the devin-proxy wire: `swe-2*` lanes are free on
+Pro+ (Flash = 3x faster, 1/5 cost — free through the promo window); any
+other catalog uid needs `DEVIN_PROXY_ALLOW_PAID=1` and bills credits.
+`devin-proxy models` lists the routed ids.
 | `subagent_explore` / `subagent_general` | built-in fallback | router / parent | — |
 
 Launch them with the subagent tool, foreground or background. Background

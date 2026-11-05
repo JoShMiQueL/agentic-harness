@@ -1,4 +1,9 @@
 {
+  "MODEL_ORCHESTRATOR": "devin-local/swe-2",
+  "MODEL_SCOUT": "devin-local/swe-2-flash",
+  "MODEL_TESTER": "devin-local/swe-2-flash-medium",
+  "MODEL_REVIEWER": "devin-local/swe-2",
+  "MODEL_WORKER": "devin-local/swe-2-flash-high",
   "REPORTS_DIR": ".opencode/reports",
   "MEMORY_STATE": ".opencode/memory/state.md",
   "MEMORY_MECHANISM": "The agentic-memory plugin injects it into the system prompt\n  automatically next session. Do not create memory for single-session work.",

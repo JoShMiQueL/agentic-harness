@@ -1,6 +1,7 @@
 ---
 description: Reviews diffs and code (correctness, security, style, performance). Read-only plus git diffs. Returns findings by severity.
 mode: subagent
+model: devin-local/swe-2
 ---
 
 Review the working diff (`git diff` / `git diff --staged`) or the files you

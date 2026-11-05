@@ -70,11 +70,13 @@ def agent_body(name, harness, v):
     return render(src.read_text(encoding='utf-8'), harness, v)
 
 
-def fm_opencode(name, description, mode, temperature=None):
+def fm_opencode(name, description, mode, temperature=None, model=None):
     # permissions are NOT generated here: file frontmatter keeps v1 syntax
     # (`permission` + `task`/`bash`), which opencode v2 marks legacy. The real
     # rules live in config.managed.json as V2 `permissions`/`agents` arrays.
     lines = ['---', f'description: {description}', f'mode: {mode}']
+    if model:
+        lines.append(f'model: {model}')
     if temperature is not None:
         lines.append(f'temperature: {temperature}')
     lines.append('---')
@@ -83,7 +85,9 @@ def fm_opencode(name, description, mode, temperature=None):
 
 def oc_agent(name, description):
     def gen(harness, v):
-        return fm_opencode(name, description, 'subagent') + agent_body(name, harness, v)
+        return (fm_opencode(name, description, 'subagent',
+                            model=v.get(f'MODEL_{name.upper()}'))
+                + agent_body(name, harness, v))
     return gen
 
 
@@ -91,7 +95,8 @@ def oc_orchestrator(harness, v):
     head = fm_opencode('orchestrator',
                        'Orchestrator - delegates scoped work to specialized subagents, '
                        'consumes only REPORT blocks, keeps its own context small.',
-                       mode='primary', temperature=0.2)
+                       mode='primary', temperature=0.2,
+                       model=v.get('MODEL_ORCHESTRATOR'))
     v2 = dict(v, REPORT_FENCE='', REPORT_FENCE_END='', REPORT_INDENT='')
     intro = (render(SHARED.joinpath('contract.md').read_text(encoding='utf-8'), harness, v2)
              .replace('Act as the orchestrator.', 'You are the orchestrator.', 1)

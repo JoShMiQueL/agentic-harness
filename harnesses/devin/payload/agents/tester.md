@@ -1,7 +1,7 @@
 ---
 name: tester
 description: Runs tests, lint, typecheck and builds; reports what passes, what fails and why. Writes only into .devin/reports/.
-model: swe-2
+model: swe-2-flash-medium
 allowed-tools:
   - read
   - grep

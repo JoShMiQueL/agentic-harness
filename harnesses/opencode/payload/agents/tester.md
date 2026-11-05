@@ -1,6 +1,7 @@
 ---
 description: Runs tests, lint, typecheck and builds; reports what passes, what fails and why. Writes only into .opencode/reports/.
 mode: subagent
+model: devin-local/swe-2-flash-medium
 ---
 
 Run the project's validation commands and report results faithfully.

@@ -149,11 +149,40 @@ def t_agent_content_contract():
         assert 'REPORT' in body and 'status: ok' in body, agent
         fm = body.split('---')[1]
         assert 'mode: subagent' in fm, agent
+        assert 'model: devin-local/' in fm, f'{agent}: no model routed'
         assert 'permission:' not in fm, f'{agent}: legacy permission frontmatter'
     orch = (home / 'agents' / 'orchestrator.md').read_text(encoding='utf-8')
     assert 'mode: primary' in orch.split('---')[1]
+    assert 'model: devin-local/' in orch.split('---')[1], 'orchestrator model missing'
     assert 'permission:' not in orch.split('---')[1], 'legacy task permission'
     assert '{{' not in orch, 'unrendered placeholder left in orchestrator'
+
+
+def t_opencode_agent_models():
+    home, _ = fresh_install('opencode')
+    want = {
+        'orchestrator': 'devin-local/swe-2',
+        'scout': 'devin-local/swe-2-flash',
+        'tester': 'devin-local/swe-2-flash-medium',
+        'reviewer': 'devin-local/swe-2',
+        'worker': 'devin-local/swe-2-flash-high',
+    }
+    for agent, model in want.items():
+        fm = (home / 'agents' / f'{agent}.md').read_text().split('---')[1]
+        assert f'model: {model}' in fm, f'{agent}: {fm}'
+
+
+def t_devin_agent_models():
+    home, _ = fresh_install('devin')
+    want = {
+        'scout': 'swe-2-flash-high',
+        'tester': 'swe-2-flash-medium',
+        'reviewer': 'swe-2',
+        'worker': 'swe-2-flash-high',
+    }
+    for agent, model in want.items():
+        fm = (home / 'agents' / f'{agent}.md').read_text().split('---')[1]
+        assert f'model: {model}' in fm, f'{agent}: {fm}'
 
 
 def t_plugin_v2_format():

@@ -1,6 +1,7 @@
 ---
 description: Autonomous implementation of scoped subtasks (features, fixes, refactors). Full tool access. Use when the orchestrator delegates code changes.
 mode: subagent
+model: devin-local/swe-2-flash-high
 ---
 
 You receive a self-contained subtask from the orchestrator: exact scope,

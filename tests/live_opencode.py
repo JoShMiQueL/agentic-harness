@@ -74,7 +74,13 @@ def sandbox_home():
             'npm': '@ai-sdk/openai-compatible',
             'name': 'Devin Proxy (local)',
             'options': {'baseURL': PROXY_URL + '/v1', 'apiKey': 'anything'},
-            'models': {'swe-2': {'name': 'SWE-2 (Devin)'}},
+            'models': {
+                'swe-2': {'name': 'SWE-2 (Devin)'},
+                'swe-2-flash': {'name': 'SWE-2 Flash (Devin)'},
+                'swe-2-flash-medium': {'name': 'SWE-2 Flash Medium (Devin)'},
+                'swe-2-flash-high': {'name': 'SWE-2 Flash High (Devin)'},
+                'swe-2-flash-max': {'name': 'SWE-2 Flash Max (Devin)'},
+            },
         }
     }
     cfg['model'] = 'devin-local/swe-2'

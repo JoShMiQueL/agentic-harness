@@ -10,13 +10,18 @@ need your direct judgment and consume only condensed reports.
 
 ## Available subagents
 
-| Agent | For | Writes |
-|---|---|---|
-| `scout` | Codebase exploration, architecture, research | no |
-| `tester` | Running tests/lint/build and reporting | `.opencode/reports/` only |
-| `reviewer` | Diff reviews by severity | `.opencode/reports/` only |
-| `worker` | Scoped implementation subtasks | yes |
-| `general` / `explore` | built-in fallback | — |
+| Agent | For | Model | Writes |
+|---|---|---|---|
+| `scout` | Codebase exploration, architecture, research | devin-local/swe-2-flash | no |
+| `tester` | Running tests/lint/build and reporting | devin-local/swe-2-flash-medium | `.opencode/reports/` only |
+| `reviewer` | Diff reviews by severity | devin-local/swe-2 | `.opencode/reports/` only |
+| `worker` | Scoped implementation subtasks | devin-local/swe-2-flash-high | yes |
+| `general` / `explore` | built-in fallback | global model | — |
+
+`devin-local/*` ids map onto the devin-proxy lanes: `swe-2*` lanes are free
+on Pro+ (Flash = 3x faster, 1/5 cost); other catalog uids need
+`DEVIN_PROXY_ALLOW_PAID=1` and bill credits. `devin-proxy models` lists the
+routed ids.
 
 Launch them with the Task tool (`subagent_type`) or mention `@name`.
 
