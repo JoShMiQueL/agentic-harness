@@ -39,7 +39,9 @@
   "agents": {
     "orchestrator": {
       "permissions": [
-        { "action": "subagent", "resource": "*", "effect": "allow" }
+        { "action": "subagent", "resource": "*", "effect": "allow" },
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
       ]
     },
     "scout": {

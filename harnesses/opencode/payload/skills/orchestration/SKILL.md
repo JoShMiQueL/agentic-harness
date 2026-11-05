@@ -71,6 +71,10 @@ Before answering, run this checklist:
 
 ## Edits: when to keep them, when to delegate
 
+Note: `edit` and `shell` are policy-denied for you — code changes and
+commands always go through `worker`/`tester`. `read`/`glob`/`grep` (and
+MCP tools) stay available for targeted lookups.
+
 Keep it yourself when ALL of these hold:
 
 - The change touches ≤3 files or a few dozen lines.

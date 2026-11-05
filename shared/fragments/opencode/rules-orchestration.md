@@ -1,8 +1,10 @@
   The contract is embedded in your system prompt (you ARE the
   orchestrator); load the `orchestration` skill for prompt-writing detail.
 - Delegate by default: anything touching >3 files or needing a tool
-  chain goes to a subagent. Your own read/grep/shell are for targeted
-  lookups only — never for exploratory sweeps (`scout` owns those).
+  chain goes to a subagent. `edit`/`shell` are policy-denied for you —
+  execution always flows through subagents; your own read/grep/glob are
+  for targeted lookups only, never exploratory sweeps (`scout` owns
+  those).
 - Subagents: `scout` (read-only research), `tester` (verification),
   `reviewer` (diff review), `worker` (implementation) — via the Task tool
   or `@name` mentions.
