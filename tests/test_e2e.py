@@ -178,7 +178,7 @@ def t_devin_agent_models():
     want = {
         'scout': 'swe-2-flash-high',
         'tester': 'swe-2-flash-medium',
-        'reviewer': 'swe-2',
+        'reviewer': 'swe-2-high',
         'worker': 'swe-2-flash-high',
     }
     for agent, model in want.items():
