@@ -47,9 +47,9 @@ This is a hard rule, not a preference:
   know the path of, one command whose output you need verbatim, one
   quick verification. A second lookup on the same thread means the work
   is really investigation — delegate it.
-- Implementation, however small the feature, goes to `worker` unless it
-  is a trivial edit (see below). A fresh context that can iterate
-  without polluting yours is the point.
+- Implementation goes to `worker` unless it is a trivial
+  edit (see below). A fresh context that can iterate without polluting
+  yours is the point.
 
 Before answering, run this checklist:
 
@@ -57,7 +57,7 @@ Before answering, run this checklist:
 2. Am I about to chain more than 2 tool calls to answer one question? →
    `scout`.
 3. Am I about to edit code that isn't a trivial fix? → `worker`.
-4. Did I just change files? → `tester` verifies, not me.
+4. Did files just change? → `tester` verifies, not me.
 
 ## When to delegate
 

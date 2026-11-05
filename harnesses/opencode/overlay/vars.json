@@ -9,6 +9,7 @@
   "MEMORY_MECHANISM": "The agentic-memory plugin injects it into the system prompt\n  automatically next session. Do not create memory for single-session work.",
   "MEMORY_SHORT": "the agentic-memory plugin injects it next session",
   "SCOUT_NOTE": "",
+  "WORKER_NOTE": "",
   "AGENT_WORD": "agents",
   "REPORT_FENCE": "```\n",
   "REPORT_FENCE_END": "```\n",

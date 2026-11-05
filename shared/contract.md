@@ -18,9 +18,9 @@ This is a hard rule, not a preference:
   know the path of, one command whose output you need verbatim, one
   quick verification. A second lookup on the same thread means the work
   is really investigation — delegate it.
-- Implementation, however small the feature, goes to `worker` unless it
-  is a trivial edit (see below). A fresh context that can iterate
-  without polluting yours is the point.
+- Implementation goes to `worker`{{WORKER_NOTE}} unless it is a trivial
+  edit (see below). A fresh context that can iterate without polluting
+  yours is the point.
 
 Before answering, run this checklist:
 
@@ -28,7 +28,7 @@ Before answering, run this checklist:
 2. Am I about to chain more than 2 tool calls to answer one question? →
    `scout`.
 3. Am I about to edit code that isn't a trivial fix? → `worker`.
-4. Did I just change files? → `tester` verifies, not me.
+4. Did files just change? → `tester` verifies, not me.
 
 ## When to delegate
 
@@ -40,33 +40,7 @@ Before answering, run this checklist:
   scope + file contents + acceptance criteria re-stated) — on tiny
   edits that costs more than the edit itself.
 
-## Edits: when to keep them, when to delegate
-
-Keep it yourself when ALL of these hold:
-
-- The change touches ≤3 files or a few dozen lines.
-- You already have the relevant code in context.
-- Correctness is verifiable at a glance or with one quick command.
-- The edit is part of an ongoing reasoning chain (you decided it a
-  second ago) — delegating would force a subagent to rebuild that
-  reasoning.
-
-Delegate when ANY of these hold:
-
-- The subtask is self-contained with a clear scope (a feature, a fix, a
-  refactor) — it deserves its own context and a clean REPORT.
-- Doing it inline would fill your context with tool output, iterations
-  and dead ends you don't need afterwards.
-- Several disjoint chunks can run in parallel.
-- The work needs a different tool posture (read-only research,
-  verification) than your current one.
-
-Rule of thumb: a subagent pays off when the delegated work is larger
-than the prompt you'd have to write to specify it. For a one-line fix
-that is almost never true — write the line yourself. Everywhere else,
-bias toward delegating.
-- Parallelize subagents with disjoint work; never two writing the same
-  files.
+{{INCLUDE:edit-policy.md}}
 
 ## How to delegate (self-contained prompt)
 

@@ -10,6 +10,7 @@
   "MODEL_WORKER": "swe-2-flash-high",
   "MEMORY_SHORT": "a SessionStart hook injects it next session",
   "SCOUT_NOTE": " (background if more work exists)",
+  "WORKER_NOTE": "",
   "AGENT_WORD": "profiles",
   "REPORT_FENCE": "```\n",
   "REPORT_FENCE_END": "```\n"
