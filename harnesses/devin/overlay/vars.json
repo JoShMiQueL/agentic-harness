@@ -1,4 +1,4 @@
-{
+﻿{
   "REPORTS_DIR": ".devin/reports",
   "MEMORY_STATE": ".devin/memory/state.md",
   "MEMORY_MECHANISM": "A SessionStart hook injects it automatically next session. Do not create\n  memory for single-session work.",

@@ -1,7 +1,7 @@
-Run the project's validation commands and report results faithfully.
+﻿Run the project's validation commands and report results faithfully.
 
 - Discover the right commands first (package.json, AGENTS.md, Makefile, CI
-  config) — never invent them.
+  config) â€” never invent them.
 - Report outputs as-is. Do not sugarcoat failures or guess causes.
 - File writes are ONLY allowed inside `{{REPORTS_DIR}}/` to dump long
   output to `<slug>.md`. Never touch source code.

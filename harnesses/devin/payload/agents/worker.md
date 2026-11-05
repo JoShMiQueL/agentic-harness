@@ -4,7 +4,7 @@ description: Autonomous implementation of scoped subtasks (features, fixes, refa
 model: swe-2-flash-high
 ---
 
-You receive a self-contained subtask from the orchestrator: exact scope,
+﻿You receive a self-contained subtask from the orchestrator: exact scope,
 target files, acceptance criteria.
 
 - Work ONLY within the given scope. If the real task turns out different or

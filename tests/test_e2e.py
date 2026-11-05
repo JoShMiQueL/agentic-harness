@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-"""agentic-harness local smoke tests — installs/uninstalls into a sandbox
+﻿#!/usr/bin/env python3
+"""agentic-harness local smoke tests â€” installs/uninstalls into a sandbox
 under ./sandbox/ and never touches real harness homes.
 
 Usage: python tests/test_e2e.py           (all tests, exit 1 on failure)
@@ -149,11 +149,11 @@ def t_agent_content_contract():
         assert 'REPORT' in body and 'status: ok' in body, agent
         fm = body.split('---')[1]
         assert 'mode: subagent' in fm, agent
-        assert 'model: devin-local/' in fm, f'{agent}: no model routed'
+        assert 'model: devin-proxy/' in fm, f'{agent}: no model routed'
         assert 'permission:' not in fm, f'{agent}: legacy permission frontmatter'
     orch = (home / 'agents' / 'orchestrator.md').read_text(encoding='utf-8')
     assert 'mode: primary' in orch.split('---')[1]
-    assert 'model: devin-local/' in orch.split('---')[1], 'orchestrator model missing'
+    assert 'model: devin-proxy/' in orch.split('---')[1], 'orchestrator model missing'
     assert 'permission:' not in orch.split('---')[1], 'legacy task permission'
     assert '{{' not in orch, 'unrendered placeholder left in orchestrator'
 
@@ -161,14 +161,15 @@ def t_agent_content_contract():
 def t_opencode_agent_models():
     home, _ = fresh_install('opencode')
     want = {
-        'orchestrator': 'devin-local/swe-2',
-        'scout': 'devin-local/swe-2-flash',
-        'tester': 'devin-local/swe-2-flash-medium',
-        'reviewer': 'devin-local/swe-2',
-        'worker': 'devin-local/swe-2-flash-high',
+        'orchestrator': 'devin-proxy/swe-2',
+        'scout': 'devin-proxy/swe-2-flash',
+        'tester': 'devin-proxy/swe-2-flash-medium',
+        'reviewer': 'devin-proxy/swe-2',
+        'worker': 'devin-proxy/swe-2-flash-high',
     }
     for agent, model in want.items():
-        fm = (home / 'agents' / f'{agent}.md').read_text().split('---')[1]
+        fm = (home / 'agents' / f'{agent}.md').read_text(
+            encoding='utf-8').split('---')[1]
         assert f'model: {model}' in fm, f'{agent}: {fm}'
 
 
@@ -181,7 +182,8 @@ def t_devin_agent_models():
         'worker': 'swe-2-flash-high',
     }
     for agent, model in want.items():
-        fm = (home / 'agents' / f'{agent}.md').read_text().split('---')[1]
+        fm = (home / 'agents' / f'{agent}.md').read_text(
+            encoding='utf-8').split('---')[1]
         assert f'model: {model}' in fm, f'{agent}: {fm}'
 
 
@@ -195,7 +197,7 @@ def t_plugin_v2_format():
 
 
 def t_auto_selects_installed():
-    # simulate: PATH has no CLIs on CI sandbox — just assert auto doesn't crash
+    # simulate: PATH has no CLIs on CI sandbox â€” just assert auto doesn't crash
     r = run('install.py', '--harness', 'auto', '--dry-run')
     assert 'devin' in r.stdout or 'opencode' in r.stdout
 

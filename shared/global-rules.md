@@ -1,4 +1,4 @@
-# Global rules
+﻿# Global rules
 
 ## Language
 
@@ -13,5 +13,5 @@
 ## Memory
 
 - Before ending a task whose state must survive the session, update
-  `{{MEMORY_STATE}}` (≤50 lines: state, decisions, pending) —
+  `{{MEMORY_STATE}}` (â‰¤50 lines: state, decisions, pending) â€”
   {{MEMORY_SHORT}}.

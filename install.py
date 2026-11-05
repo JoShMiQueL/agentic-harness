@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """agentic-harness installer - one orchestration layer, several harnesses.
 
 Usage:

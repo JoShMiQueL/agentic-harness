@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-"""Live end-to-end test of the devin harness — runs the real `devin` CLI
+﻿#!/usr/bin/env python3
+"""Live end-to-end test of the devin harness â€” runs the real `devin` CLI
 against a sandbox data dir (never touches the real %APPDATA%\\devin usage).
 
-Needs the real credentials file (devin auth login) — the CLI itself
+Needs the real credentials file (devin auth login) â€” the CLI itself
 authenticates; we only redirect DEVIN_DATA_DIR so agents/hooks/rules come
 from the sandbox install.
 
@@ -37,7 +37,7 @@ def sandbox_home():
             Path.home() / '.config' / 'devin' / 'credentials.toml'
         default.parent.mkdir(parents=True, exist_ok=True)
         default.write_text(creds.rstrip('\n') + '\n')
-    else:      # local: real creds already at the default path — nothing to do
+    else:      # local: real creds already at the default path â€” nothing to do
         pass
     return sb
 

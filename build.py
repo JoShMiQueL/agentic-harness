@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """agentic-harness payload builder.
 
 Renders harnesses/<name>/payload text files from:
@@ -145,7 +145,7 @@ BUILD = {
         'AGENTS.md': ('global-rules.md', 'shared'),
         'skills/orchestration/SKILL.md': lambda h, v: (
             '---\nname: orchestration\n'
-            'description: Orchestration contract — when and how to delegate to '
+            'description: Orchestration contract â€” when and how to delegate to '
             'specialized subagents, structured REPORT input, disk artifacts and '
             'optional memory. Load on multi-step tasks.\n---\n\n'
             + skill_doc(h, v, 'Lightweight orchestration')),

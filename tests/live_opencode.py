@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-"""Live end-to-end test of the opencode harness — `opencode run` against a
+﻿#!/usr/bin/env python3
+"""Live end-to-end test of the opencode harness â€” `opencode run` against a
 sandbox OPENCODE_CONFIG_DIR with the devin-proxy in front.
 
 Needs (CI): vars.DEVIN_PROXY_REPO (owner/repo of the proxy code) and
@@ -35,7 +35,7 @@ def start_proxy(workdir):
         subprocess.run(['git', 'clone', '--depth', '1',
                         f'https://github.com/{repo}', pdir],
                        check=True, capture_output=True)
-    # flat layout: devin_proxy/ package at repo root — pyproject must sit in pdir
+    # flat layout: devin_proxy/ package at repo root â€” pyproject must sit in pdir
     if not (Path(pdir) / 'pyproject.toml').is_file():
         cand = list(Path(pdir).rglob('pyproject.toml'))
         if cand:
@@ -70,7 +70,7 @@ def sandbox_home():
     cfg_path = sb / 'opencode.json'
     cfg = json.loads(cfg_path.read_text())
     cfg['provider'] = {
-        'devin-local': {
+        'devin-proxy': {
             'npm': '@ai-sdk/openai-compatible',
             'name': 'Devin Proxy (local)',
             'options': {'baseURL': PROXY_URL + '/v1', 'apiKey': 'anything'},
@@ -83,8 +83,8 @@ def sandbox_home():
             },
         }
     }
-    cfg['model'] = 'devin-local/swe-2'
-    cfg['small_model'] = 'devin-local/swe-2'
+    cfg['model'] = 'devin-proxy/swe-2'
+    cfg['small_model'] = 'devin-proxy/swe-2'
     cfg_path.write_text(json.dumps(cfg, indent=2) + '\n')
     return sb
 
